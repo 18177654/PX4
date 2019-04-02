@@ -1,0 +1,80 @@
+#!/bin/sh
+#
+# @name Griffin
+#
+# @type Quadrotor x
+# @class Copter
+#
+
+sh /etc/init.d/rc.mc_defaults
+
+param set BAT_N_CELLS 6
+
+param set MIS_TAKEOFF_ALT 2.5
+
+param set MC_DTERM_CUTOFF 30.0
+
+param set MC_ROLL_P 5
+param set MC_ROLLRATE_P 0.2764
+param set MC_ROLLRATE_I 0.0720
+param set MC_ROLLRATE_D 0.0060
+param set MC_ROLLRATE_FF 0.0
+param set MC_ROLLRATE_MAX 120.0
+param set MC_ACRO_R_MAX 120.0
+
+param set MC_PITCH_P 5
+param set MC_PITCHRATE_P 0.2764
+param set MC_PITCHRATE_I 0.0720
+param set MC_PITCHRATE_D 0.0060
+param set MC_PITCHRATE_FF 0.0
+param set MC_PITCHRATE_MAX 120.0
+param set MC_ACRO_P_MAX 120.0
+
+param set MC_YAW_P 1.2
+param set MC_YAWRATE_P 0.4780
+param set MC_YAWRATE_I 0.2390
+param set MC_YAWRATE_D 0
+param set MC_YAWRATE_FF 0.0
+param set MC_YAWRATE_MAX 90.0
+param set MC_YAWRAUTO_MAX 90.0
+param set MC_ACRO_Y_MAX 45.0
+param set MPC_MAN_Y_MAX 45.0
+
+param set MPC_TILTMAX_AIR 30.0
+param set MPC_MAN_TILT_MAX 30.0
+
+param set MPC_VELD_LP 5.0
+
+param set MPC_XY_VEL_MAX 8.0
+
+param set MPC_XY_P 0.8
+param set MPC_XY_VEL_P 0.1615
+param set MPC_XY_VEL_I 0.0319
+param set MPC_XY_VEL_D 0.0106
+
+param set MPC_Z_P 1.0
+param set MPC_Z_VEL_P 0.2390
+param set MPC_Z_VEL_I 0.0478
+param set MPC_Z_VEL_D 0
+
+param set EKF2_ACC_B_NOISE 0
+param set EKF2_ACC_NOISE 0
+param set EKF2_GYR_B_NOISE 0
+param set EKF2_GYR_NOISE 0
+param set EKF2_BARO_NOISE 0
+param set EKF2_MAG_B_NOISE 0
+param set EKF2_MAG_NOISE 0
+param set EKF2_HEAD_NOISE 0
+param set EKF2_GPS_P_NOISE 0
+param set EKF2_GPS_V_NOISE 0
+param set EKF2_WIND_NOISE 0
+
+param set EKF2_GPS_DELAY 0
+
+param set PWM_MAX 1670
+
+param set MPC_THR_HOVER 0.3515625
+param set MPC_THR_MAX 1.0
+param set MPC_THR_MIN 0.0
+
+set MIXER quad_x

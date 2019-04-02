@@ -1,0 +1,16 @@
+#!nsh
+#
+# @name SLADe HIL
+#
+# @type Simulation
+# @class Copter
+#
+# @output MAIN1 motor 1
+# @output MAIN2 motor 2
+# @output MAIN3 motor 3
+# @output MAIN4 motor 4
+#
+
+sh /etc/init.d/5002_slade
+
+param set SYS_HITL 1

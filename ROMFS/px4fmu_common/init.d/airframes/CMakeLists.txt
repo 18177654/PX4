@@ -38,6 +38,8 @@ px4_add_romfs_files(
 	1000_rc_fw_easystar.hil
 	1001_rc_quad_x.hil
 	1002_standard_vtol.hil
+	1003_slade.hil
+	1004_griffin.hil
 	
 	# [2000, 2999] Standard planes"
 	2100_standard_plane
@@ -82,9 +84,11 @@ px4_add_romfs_files(
 	4100_tiltquadrotor
 	4250_teal
 	4900_crazyflie
+	4960_griffin
 
 	# [5000, 5999] Quadrotor +"
 	5001_quad_+
+	5002_slade
 
 	# [6000, 6999] Hexarotor x"
 	6001_hexa_x
