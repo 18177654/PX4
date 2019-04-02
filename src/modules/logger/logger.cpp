@@ -614,13 +614,12 @@ bool Logger::try_to_subscribe_topic(LoggerSubscription &sub, int multi_instance)
 void Logger::add_default_topics()
 {
 	// Note: try to avoid setting the interval where possible, as it increases RAM usage
-	add_topic("actuator_controls_0", 100);
 	add_topic("actuator_controls_1", 100);
-	add_topic("actuator_outputs", 100);
 	add_topic("airspeed", 200);
 	add_topic("battery_status", 500);
 	add_topic("camera_capture");
 	add_topic("camera_trigger");
+	add_topic("camera_trigger_secondary");
 	add_topic("cpuload");
 	add_topic("distance_sensor", 100);
 	add_topic("ekf2_innovations", 200);
@@ -643,20 +642,33 @@ void Logger::add_default_topics()
 	add_topic("trajectory_setpoint", 200);
 	add_topic("telemetry_status");
 	add_topic("vehicle_air_data", 200);
-	add_topic("vehicle_attitude", 30);
-	add_topic("vehicle_attitude_setpoint", 100);
 	add_topic("vehicle_command");
 	add_topic("vehicle_global_position", 200);
 	add_topic("vehicle_gps_position");
 	add_topic("vehicle_land_detected");
-	add_topic("vehicle_local_position", 100);
-	add_topic("vehicle_local_position_setpoint", 100);
 	add_topic("vehicle_magnetometer", 200);
 	add_topic("vehicle_rates_setpoint", 30);
 	add_topic("vehicle_status", 200);
 	add_topic("vehicle_status_flags");
 	add_topic("vtol_vehicle_status", 200);
 	add_topic("wind_estimate", 200);
+
+	// Log topics at a higher rate during simulation
+#ifdef CONFIG_ARCH_BOARD_PX4_SITL
+	add_topic("actuator_controls_0");
+	add_topic("actuator_outputs");
+	add_topic("vehicle_attitude");
+	add_topic("vehicle_attitude_setpoint");
+	add_topic("vehicle_local_position");
+	add_topic("vehicle_local_position_setpoint");
+#else
+	add_topic("actuator_controls_0", 100);
+	add_topic("actuator_outputs", 100);
+	add_topic("vehicle_attitude", 30);
+	add_topic("vehicle_attitude_setpoint", 100);
+	add_topic("vehicle_local_position", 100);
+	add_topic("vehicle_local_position_setpoint", 100);
+#endif /* CONFIG_ARCH_BOARD_PX4_SITL */
 
 #ifdef CONFIG_ARCH_BOARD_PX4_SITL
 	add_topic("actuator_controls_virtual_fw");
@@ -667,9 +679,9 @@ void Logger::add_default_topics()
 	add_topic("position_controller_status");
 	add_topic("offboard_control_mode");
 	add_topic("time_offset");
-	add_topic("vehicle_attitude_groundtruth", 10);
-	add_topic("vehicle_global_position_groundtruth", 100);
-	add_topic("vehicle_local_position_groundtruth", 100);
+	add_topic("vehicle_attitude_groundtruth");
+	add_topic("vehicle_global_position_groundtruth");
+	add_topic("vehicle_local_position_groundtruth");
 	add_topic("vehicle_roi");
 #endif /* CONFIG_ARCH_BOARD_PX4_SITL */
 }
