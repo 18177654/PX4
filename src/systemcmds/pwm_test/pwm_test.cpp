@@ -158,7 +158,7 @@ pwm_test_main(int argc, char *argv[])
 	int myoptind = 1;
 	const char *myoptarg = nullptr;
 
-	while ((ch = px4_getopt(argc, argv, "d:vec:g:m:p:l:h:s:t:", &myoptind, &myoptarg)) != EOF) {
+	while ((ch = px4_getopt(argc, argv, "d:vec:g:m:p:l:h:s:t:r", &myoptind, &myoptarg)) != EOF) {
 		switch (ch) {
 
 		case 'd':

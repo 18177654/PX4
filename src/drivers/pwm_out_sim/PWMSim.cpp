@@ -167,6 +167,15 @@ PWMSim::run()
 	update_params();
 	int params_sub = orb_subscribe(ORB_ID(parameter_update));
 
+	// Scale PWM to normalize motor inputs
+	double scalars[16];
+	for(int i = 0 ; i < 16 ; i++) {
+		scalars[i] = 1.0;
+	}
+	scalars[0] = 1.01315789;
+	scalars[1] = 1.00442478;
+	scalars[2] = 1.00074019;
+
 	/* loop until killed */
 	while (!should_exit()) {
 
@@ -256,6 +265,10 @@ PWMSim::run()
 				if (_armed && sane_mixer_output) {
 					/* scale for PWM output 1000 - 2000us */
 					_actuator_outputs.output[i] = 1500 + (500 * _actuator_outputs.output[i]);
+					// Normalize only when above armed PWM
+					if(_actuator_outputs.output[i] > 1080) {
+						_actuator_outputs.output[i] *= (float)scalars[i];
+					}
 					_actuator_outputs.output[i] = math::constrain(_actuator_outputs.output[i], (float)_pwm_min[i], (float)_pwm_max[i]);
 
 				} else {

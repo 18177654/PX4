@@ -61,6 +61,15 @@ void pwm_limit_calc(const bool armed, const bool pre_armed, const unsigned num_c
 		    const float *output, uint16_t *effective_pwm, pwm_limit_t *limit)
 {
 
+	// Scale PWM to normalize motor inputs
+	double scalars[16];
+	for(int i = 0 ; i < 16 ; i++) {
+		scalars[i] = 1.0;
+	}
+	scalars[0] = 1.01315789;
+	scalars[1] = 1.00442478;
+	scalars[2] = 1.00074019;
+
 	/* first evaluate state changes */
 	switch (limit->state) {
 	case PWM_LIMIT_STATE_INIT:
@@ -180,6 +189,10 @@ void pwm_limit_calc(const bool armed, const bool pre_armed, const unsigned num_c
 				}
 
 				effective_pwm[i] = control_value * (max_pwm[i] - ramp_min_pwm) / 2 + (max_pwm[i] + ramp_min_pwm) / 2;
+				// Normalize only when above armed PWM
+				if(effective_pwm[i] > 1080) {
+					effective_pwm[i] *= scalars[i];
+				}
 
 				/* last line of defense against invalid inputs */
 				if (effective_pwm[i] < ramp_min_pwm) {
@@ -209,6 +222,10 @@ void pwm_limit_calc(const bool armed, const bool pre_armed, const unsigned num_c
 			}
 
 			effective_pwm[i] = control_value * (max_pwm[i] - min_pwm[i]) / 2 + (max_pwm[i] + min_pwm[i]) / 2;
+			// Normalize only when above armed PWM
+			if(effective_pwm[i] > 1080) {
+				effective_pwm[i] *= scalars[i];
+			}
 
 			/* last line of defense against invalid inputs */
 			if (effective_pwm[i] < min_pwm[i]) {
