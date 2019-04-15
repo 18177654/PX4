@@ -121,6 +121,7 @@ $ pwm test -c 13 -p 1200
 	PRINT_MODULE_USAGE_PARAM_INT('g', -1, 0, 10, "Select channels by group (eg. 0, 1, 2. use 'pwm info' to show groups)",
 				     true);
 	PRINT_MODULE_USAGE_PARAM_FLAG('a', "Select all channels", true);
+	PRINT_MODULE_USAGE_PARAM_FLOAT('r', 1, 0, 2, "Scale the PWM value", false);
 
 	PRINT_MODULE_USAGE_PARAM_COMMENT("These parameters apply to all commands:");
 	PRINT_MODULE_USAGE_PARAM_STRING('d', "/dev/pwm_output0", "<file:dev>", "Select PWM output device", true);
@@ -147,6 +148,7 @@ pwm_test_main(int argc, char *argv[])
 	int pwm_value = 0;
 	int min_pwm = 0;
 	int max_pwm = 0;
+	float pwm_scale = 1.0;
 	int step_pwm = 0;
 	int step_time = 0;
 
@@ -158,7 +160,7 @@ pwm_test_main(int argc, char *argv[])
 	int myoptind = 1;
 	const char *myoptarg = nullptr;
 
-	while ((ch = px4_getopt(argc, argv, "d:vec:g:m:p:l:h:s:t:r", &myoptind, &myoptarg)) != EOF) {
+	while ((ch = px4_getopt(argc, argv, "d:vec:g:m:p:l:h:s:t:r:", &myoptind, &myoptarg)) != EOF) {
 		switch (ch) {
 
 		case 'd':
@@ -255,6 +257,11 @@ pwm_test_main(int argc, char *argv[])
 			}
 			break;
 
+		case 'r':
+			pwm_scale = strtof32(myoptarg, &ep);
+			PX4_INFO("Scale value: %f\n", (double)pwm_scale);
+			break;
+
 		default:
 			usage(nullptr);
 			return 1;
@@ -341,7 +348,7 @@ pwm_test_main(int argc, char *argv[])
 		while (1) {
 			for (unsigned i = 0; i < servo_count; i++) {
 				if (set_mask & 1 << i) {
-					ret = px4_ioctl(fd, PWM_SERVO_SET(i), pwm_value);
+					ret = px4_ioctl(fd, PWM_SERVO_SET(i), pwm_value * pwm_scale);
 
 					if (ret != OK) {
 						PX4_ERR("PWM_SERVO_SET(%d)", i);
@@ -462,15 +469,15 @@ err_out_no_test:
 		     steps_timing_index <= num_steps;
 		     steps_timing_index++) {
 
-			PX4_INFO("Step input: %d", current_val);
+			PX4_INFO("Step input: %d", (int)(current_val * pwm_scale));
 
 			for (unsigned i = 0; i < servo_count; i++) {
 				if (set_mask & 1 << i) {
 
-					ret = px4_ioctl(fd, PWM_SERVO_SET(i), current_val);
+					ret = px4_ioctl(fd, PWM_SERVO_SET(i), current_val * pwm_scale);
 
 					if (ret != OK) {
-						PX4_ERR("PWM_SERVO_SET(%d) = %d", i, current_val);
+						PX4_ERR("PWM_SERVO_SET(%d) = %d", i, (int)(current_val * pwm_scale));
 						goto err_out;
 					}
 				}
