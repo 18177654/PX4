@@ -104,6 +104,7 @@ pwm_limit_t     _pwm_limit;
 int32_t _pwm_disarmed;
 int32_t _pwm_min;
 int32_t _pwm_max;
+float _pwm_scaling[8];
 
 MixerGroup *_mixer_group = nullptr;
 
@@ -348,11 +349,18 @@ void task_main(int argc, char *argv[])
 			uint16_t disarmed_pwm[actuator_outputs_s::NUM_ACTUATOR_OUTPUTS];
 			uint16_t min_pwm[actuator_outputs_s::NUM_ACTUATOR_OUTPUTS];
 			uint16_t max_pwm[actuator_outputs_s::NUM_ACTUATOR_OUTPUTS];
+			float pwm_scaling[actuator_outputs_s::NUM_ACTUATOR_OUTPUTS];
 
 			for (unsigned int i = 0; i < actuator_outputs_s::NUM_ACTUATOR_OUTPUTS; i++) {
 				disarmed_pwm[i] = _pwm_disarmed;
 				min_pwm[i] = _pwm_min;
 				max_pwm[i] = _pwm_max;
+
+				if(i < 8) {
+					pwm_scaling[i] = _pwm_scaling[i];
+				} else {
+					pwm_scaling[i] = 1.0;
+				}
 			}
 
 			uint16_t pwm[actuator_outputs_s::NUM_ACTUATOR_OUTPUTS];
@@ -365,6 +373,7 @@ void task_main(int argc, char *argv[])
 				       disarmed_pwm,
 				       min_pwm,
 				       max_pwm,
+					   pwm_scaling,
 				       _outputs.output,
 				       pwm,
 				       &_pwm_limit);
@@ -563,6 +572,18 @@ int linux_pwm_out_main(int argc, char *argv[])
 	param_get(param_find("PWM_DISARMED"), &linux_pwm_out::_pwm_disarmed);
 	param_get(param_find("PWM_MIN"), &linux_pwm_out::_pwm_min);
 	param_get(param_find("PWM_MAX"), &linux_pwm_out::_pwm_max);
+
+	for(unsigned i = 0 ; i < 8 ; i++) {
+		char pwm_main_scale[16];
+		sprintf(pwm_main_scale, "PWM_MAIN_SCALE%d", i+1);
+		param_handle = param_find(pwm_main_scale);
+		if (param_handle != PARAM_INVALID) {
+			float pwm_scaling;
+			param_get(param_handle, &pwm_scaling);
+
+			_pwm_scaling[i] = pwm_scaling;
+		}
+	}
 
 	/*
 	 * Start/load the driver.

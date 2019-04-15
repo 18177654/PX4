@@ -226,6 +226,7 @@ private:
 	uint16_t	_disarmed_pwm[_max_actuators];
 	uint16_t	_min_pwm[_max_actuators];
 	uint16_t	_max_pwm[_max_actuators];
+	float			_pwm_scaling[_max_actuators];
 	uint16_t	_reverse_pwm_mask;
 	unsigned	_num_failsafe_set;
 	unsigned	_num_disarmed_set;
@@ -1186,7 +1187,7 @@ PX4FMU::cycle()
 				uint16_t pwm_limited[MAX_ACTUATORS];
 
 				pwm_limit_calc(_throttle_armed, arm_nothrottle(), mixed_num_outputs, _reverse_pwm_mask,
-					       _disarmed_pwm, _min_pwm, _max_pwm, outputs, pwm_limited, &_pwm_limit);
+					       _disarmed_pwm, _min_pwm, _max_pwm, _pwm_scaling, outputs, pwm_limited, &_pwm_limit);
 
 				/* overwrite outputs in case of force_failsafe with _failsafe_pwm PWM values */
 				if (_armed.force_failsafe) {
@@ -1390,6 +1391,23 @@ void PX4FMU::update_params()
 
 	if (param_handle != PARAM_INVALID) {
 		param_get(param_handle, (int32_t *)&_motor_ordering);
+	}
+
+	// pwm scaling
+	for(unsigned i = 0 ; i < _max_actuators ; i++) {
+		if(i < 8) {
+			char pwm_main_scale[16];
+			sprintf(pwm_main_scale, "PWM_MAIN_SCALE%d", i+1);
+			param_handle = param_find(pwm_main_scale);
+			if (param_handle != PARAM_INVALID) {
+				float pwm_scaling;
+				param_get(param_handle, &pwm_scaling);
+
+				_pwm_scaling[i] = pwm_scaling;
+			}
+		} else {
+			_pwm_scaling[i] = 1.0;
+		}
 	}
 }
 

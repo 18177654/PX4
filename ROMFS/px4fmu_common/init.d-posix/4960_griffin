@@ -11,6 +11,7 @@ sh /etc/init.d/rc.mc_defaults
 param set BAT_N_CELLS 6
 
 param set MIS_TAKEOFF_ALT 2.5
+param set RTL_DESCEND_ALT 10
 
 param set MC_DTERM_CUTOFF 30.0
 
@@ -59,9 +60,16 @@ param set MPC_Z_VEL_I 0.0279
 param set MPC_Z_VEL_D 0
 
 param set PWM_MAX 1670
+param set PWM_MIN 1000
 
 param set MPC_THR_HOVER 0.3515625
 param set MPC_THR_MAX 1.0
-param set MPC_THR_MIN 0.0
+param set MPC_THR_MIN 0.08
+param set MPC_MANTHR_MIN 0.08
+
+param set PWM_MAIN_SCALE1 1.01315789
+param set PWM_MAIN_SCALE2 1.00442478
+param set PWM_MAIN_SCALE3 1.00074019
+param set PWM_MAIN_SCALE4 1.00000000
 
 set MIXER quad_x

@@ -786,3 +786,111 @@ PARAM_DEFINE_FLOAT(PWM_MAIN_TRIM7, 0);
  * @group PWM Outputs
  */
 PARAM_DEFINE_FLOAT(PWM_MAIN_TRIM8, 0);
+
+/******************************************************************************
+*                               PWM_MAIN_SCALE                                *
+******************************************************************************/
+
+/**
+ * Scale value for main output channel 1
+ *
+ * Scales the computed PWM value with this scalar value.
+ * This is usually set to normalize the motors' output around hover.
+ *
+ * @min 0
+ * @max 2.0
+ * @decimal 6
+ * @group PWM Outputs
+ */
+PARAM_DEFINE_FLOAT(PWM_MAIN_SCALE1, 1.0);
+
+/**
+ * Scale value for main output channel 2
+ *
+ * Scales the computed PWM value with this scalar value.
+ * This is usually set to normalize the motors' output around hover.
+ *
+ * @min 0
+ * @max 2.0
+ * @decimal 6
+ * @group PWM Outputs
+ */
+PARAM_DEFINE_FLOAT(PWM_MAIN_SCALE2, 1.0);
+
+/**
+ * Scale value for main output channel 3
+ *
+ * Scales the computed PWM value with this scalar value.
+ * This is usually set to normalize the motors' output around hover.
+ *
+ * @min 0
+ * @max 2.0
+ * @decimal 6
+ * @group PWM Outputs
+ */
+PARAM_DEFINE_FLOAT(PWM_MAIN_SCALE3, 1.0);
+
+/**
+ * Scale value for main output channel 4
+ *
+ * Scales the computed PWM value with this scalar value.
+ * This is usually set to normalize the motors' output around hover.
+ *
+ * @min 0
+ * @max 2.0
+ * @decimal 6
+ * @group PWM Outputs
+ */
+PARAM_DEFINE_FLOAT(PWM_MAIN_SCALE4, 1.0);
+
+/**
+ * Scale value for main output channel 5
+ *
+ * Scales the computed PWM value with this scalar value.
+ * This is usually set to normalize the motors' output around hover.
+ *
+ * @min 0
+ * @max 2.0
+ * @decimal 6
+ * @group PWM Outputs
+ */
+PARAM_DEFINE_FLOAT(PWM_MAIN_SCALE5, 1.0);
+
+/**
+ * Scale value for main output channel 6
+ *
+ * Scales the computed PWM value with this scalar value.
+ * This is usually set to normalize the motors' output around hover.
+ *
+ * @min 0
+ * @max 2.0
+ * @decimal 6
+ * @group PWM Outputs
+ */
+PARAM_DEFINE_FLOAT(PWM_MAIN_SCALE6, 1.0);
+
+/**
+ * Scale value for main output channel 7
+ *
+ * Scales the computed PWM value with this scalar value.
+ * This is usually set to normalize the motors' output around hover.
+ *
+ * @min 0
+ * @max 2.0
+ * @decimal 6
+ * @group PWM Outputs
+ */
+PARAM_DEFINE_FLOAT(PWM_MAIN_SCALE7, 1.0);
+
+/**
+ * Scale value for main output channel 8
+ *
+ * Scales the computed PWM value with this scalar value.
+ * This is usually set to normalize the motors' output around hover.
+ *
+ * @min 0
+ * @max 2.0
+ * @decimal 6
+ * @group PWM Outputs
+ */
+PARAM_DEFINE_FLOAT(PWM_MAIN_SCALE8, 1.0);

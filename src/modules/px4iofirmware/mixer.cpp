@@ -286,6 +286,11 @@ mixer_tick(void)
 		float	outputs[PX4IO_SERVO_COUNT];
 		unsigned mixed;
 
+		float 	pwm_scaling[PX4IO_SERVO_COUNT];
+		for (unsigned i = 0; i < PX4IO_SERVO_COUNT; i++) {
+			pwm_scaling[i] = 1.0;
+		}
+
 		if (REG_TO_FLOAT(r_setup_slew_max) > FLT_EPSILON) {
 			/*  maximum value the outputs of the multirotor mixer are allowed to change in this cycle
 			 * factor 2 is needed because actuator outputs are in the range [-1,1]
@@ -306,7 +311,7 @@ mixer_tick(void)
 
 		/* the pwm limit call takes care of out of band errors */
 		pwm_limit_calc(should_arm, should_arm_nothrottle, mixed, r_setup_pwm_reverse, r_page_servo_disarmed,
-			       r_page_servo_control_min, r_page_servo_control_max, outputs, r_page_servos, &pwm_limit);
+			       r_page_servo_control_min, r_page_servo_control_max, pwm_scaling, outputs, r_page_servos, &pwm_limit);
 
 		/* clamp unused outputs to zero */
 		for (unsigned i = mixed; i < PX4IO_SERVO_COUNT; i++) {

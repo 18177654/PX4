@@ -111,6 +111,7 @@ pwm_limit_t     _pwm_limit;
 int32_t _pwm_disarmed;
 int32_t _pwm_min;
 int32_t _pwm_max;
+float _pwm_scaling[4];
 
 MultirotorMixer *_mixer = nullptr;
 
@@ -430,18 +431,20 @@ void task_main(int argc, char *argv[])
 		uint16_t min_pwm[4];
 		uint16_t max_pwm[4];
 		uint16_t pwm[4];
+		float pwm_scaling[4];
 
 		for (unsigned int i = 0; i < 4; i++) {
 			disarmed_pwm[i] = _pwm_disarmed;
 			min_pwm[i] = _pwm_min;
 			max_pwm[i] = _pwm_max;
+			pwm_scaling[i] = _pwm_scaling[i];
 		}
 
 
 		// TODO FIXME: pre-armed seems broken -> copied and pasted from pwm_out_rc_in: needs to be tested
 		pwm_limit_calc(_armed.armed,
 			       false/*_armed.prearmed*/, _outputs.noutputs, reverse_mask, disarmed_pwm,
-			       min_pwm, max_pwm, _outputs.output, pwm, &_pwm_limit);
+			       min_pwm, max_pwm, pwm_scaling, _outputs.output, pwm, &_pwm_limit);
 
 		// send and publish outputs
 		if (_armed.lockdown || _armed.manual_lockdown || timeout) {
@@ -585,6 +588,18 @@ int snapdragon_pwm_out_main(int argc, char *argv[])
 	param_get(param_find("PWM_DISARMED"), &snapdragon_pwm::_pwm_disarmed);
 	param_get(param_find("PWM_MIN"), &snapdragon_pwm::_pwm_min);
 	param_get(param_find("PWM_MAX"), &snapdragon_pwm::_pwm_max);
+
+	for(unsigned i = 0 ; i < 4 ; i++) {
+		char pwm_main_scale[16];
+		sprintf(pwm_main_scale, "PWM_MAIN_SCALE%d", i+1);
+		param_handle = param_find(pwm_main_scale);
+		if (param_handle != PARAM_INVALID) {
+			float pwm_scaling;
+			param_get(param_handle, &pwm_scaling);
+
+			_pwm_scaling[i] = pwm_scaling;
+		}
+	}
 
 	/*
 	 * Start/load the driver.

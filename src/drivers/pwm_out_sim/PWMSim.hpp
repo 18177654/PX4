@@ -133,6 +133,8 @@ private:
 
 	Mixer::Airmode 	_airmode{Mixer::Airmode::disabled}; 	///< multicopter air-mode
 
+	float _pwm_scaling[8];
+
 	perf_counter_t	_perf_control_latency;
 
 	static int	control_callback(uintptr_t handle, uint8_t control_group, uint8_t control_index, float &input);
