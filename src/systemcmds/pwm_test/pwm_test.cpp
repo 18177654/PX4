@@ -258,7 +258,7 @@ pwm_test_main(int argc, char *argv[])
 			break;
 
 		case 'r':
-			pwm_scale = strtof32(myoptarg, &ep);
+			pwm_scale = strtof(myoptarg, &ep);
 			PX4_INFO("Scale value: %f\n", (double)pwm_scale);
 			break;
 
