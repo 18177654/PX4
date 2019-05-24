@@ -192,6 +192,25 @@ PARAM_DEFINE_FLOAT(MPC_Z_VEL_MAX_UP, 3.0f);
 PARAM_DEFINE_FLOAT(MPC_Z_VEL_MAX_DN, 1.0f);
 
 /**
+ * Uses adaptive control instead of PID control
+ *
+ * @min 0
+ * @max 1
+ * @group Multicopter Position Control
+ */
+PARAM_DEFINE_INT32(MPC_X_ADAPTIVE, 0);
+
+/**
+ * Proportional gain for horizontal position error with adaptive velocity controller
+ *
+ * @min 0.0
+ * @max 2.0
+ * @decimal 2
+ * @group Multicopter Position Control
+ */
+PARAM_DEFINE_FLOAT(MPC_X_ADAPTIVE_P, 0.4f);
+
+/**
  * Proportional gain for horizontal position error
  *
  * @min 0.0

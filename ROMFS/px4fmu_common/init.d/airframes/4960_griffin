@@ -56,6 +56,9 @@ then
 	param set MPC_XY_CRUISE 12.0
 	param set MPC_XY_VEL_MAX 12.0
 
+	param set MPC_X_ADAPTIVE 0
+	param set MPC_X_ADAPTIVE_P 0.4
+
 	param set MPC_XY_P 0.73254
 	param set MPC_XY_VEL_P 0.1615
 	param set MPC_XY_VEL_I 0.0319

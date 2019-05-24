@@ -257,8 +257,6 @@ private:
 
 	float the11, the12, the21, the22, the3, c0;
 
-	bool enable_adaptive;
-
 	DEFINE_PARAMETERS(
 		(ParamFloat<px4::params::MPC_THR_MAX>) MPC_THR_MAX,
 		(ParamFloat<px4::params::MPC_THR_HOVER>) MPC_THR_HOVER,
@@ -274,7 +272,9 @@ private:
 		(ParamFloat<px4::params::MPC_Z_VEL_P>) MPC_Z_VEL_P,
 		(ParamFloat<px4::params::MPC_Z_VEL_I>) MPC_Z_VEL_I,
 		(ParamFloat<px4::params::MPC_Z_VEL_D>) MPC_Z_VEL_D,
+		(ParamInt<px4::params::MPC_X_ADAPTIVE>) MPC_X_ADAPTIVE,
 		(ParamFloat<px4::params::MPC_XY_P>) MPC_XY_P,
+		(ParamFloat<px4::params::MPC_X_ADAPTIVE_P>) MPC_X_ADAPTIVE_P,
 		(ParamFloat<px4::params::MPC_XY_VEL_P>) MPC_XY_VEL_P,
 		(ParamFloat<px4::params::MPC_XY_VEL_I>) MPC_XY_VEL_I,
 		(ParamFloat<px4::params::MPC_XY_VEL_D>) MPC_XY_VEL_D

@@ -70,8 +70,6 @@ PositionControl::PositionControl(ModuleParams *parent) :
     the22 = the22_init;
     the3 = the3_init;
     c0 = c0_init;
-
-	enable_adaptive = false;
 }
 
 void PositionControl::updateState(const PositionControlStates &states)
@@ -250,9 +248,9 @@ void PositionControl::_positionController()
 {
 	// P-position controller
 	Vector3f vel_sp_position;
-	if(enable_adaptive)
+	if(MPC_X_ADAPTIVE.get() > 0)
 	{
-		vel_sp_position = (_pos_sp - _pos).emult(Vector3f(0.4, MPC_XY_P.get(), MPC_Z_P.get()));
+		vel_sp_position = (_pos_sp - _pos).emult(Vector3f(MPC_X_ADAPTIVE_P.get(), MPC_XY_P.get(), MPC_Z_P.get()));
 	}
 	else
 	{
@@ -331,7 +329,7 @@ void PositionControl::_velocityController(const float &dt)
 	} else {
 		// PID-velocity controller for NE-direction.
 		Vector2f thrust_desired_NE;
-		if(enable_adaptive)
+		if(MPC_X_ADAPTIVE.get() > 0)
 		{
 			thrust_desired_NE(0) = _adaptiveDirectMRACUnnormalized(dt, _vel_sp(0), _vel(0));
 		}

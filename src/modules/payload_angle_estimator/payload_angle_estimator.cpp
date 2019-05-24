@@ -137,6 +137,15 @@ void PayloadAngleEstimator::run()
 	float v_out_max = 2.8206f;
 	float r2_max = 12.0f*v_out_max/(5.0f - v_out_max);
 	float range_max = 270.0f;
+	float bias = -14.5;
+
+	uint8_t channel = 3;
+	float cutoff_hz = 1.0f;
+
+	// Variables.
+	hrt_abstime last_time = hrt_absolute_time();
+	float adc_voltage;
+	bool dry_run = true;
 
 	while (!should_exit()) {
 
@@ -154,16 +163,37 @@ void PayloadAngleEstimator::run()
 
 		} else if (fds[0].revents & POLLIN) {
 
+			// Retrieve ADC value
 			struct adc_report_s adc_report;
 			orb_copy(ORB_ID(adc_report), adc_report_sub, &adc_report);
+
+			// Lowpass filter the measurement
+			hrt_abstime current_time = hrt_absolute_time();
+
+			float RC = 1.0f/(cutoff_hz*2.0f*3.14f);
+			float dt = (current_time - last_time)*1.0e-6f;
+			float alpha = dt/(RC+dt);
 			
-			uint8_t channel = 3;
-			payload_angle_report.payload_angle = (range_max/r2_max)*(12.0f*adc_report.channel_value[channel]/(5.0f-adc_report.channel_value[channel])) - range_max/2.0f;
+			// Get initial ADC value for LPF
+			if(dry_run)
+			{
+				adc_voltage = adc_report.channel_value[channel];
+				dry_run = false;
+			}
+			else
+			{
+				adc_voltage = adc_voltage + (alpha*(adc_report.channel_value[channel] - adc_voltage));
+			}
+
+			payload_angle_report.payload_angle = -((range_max/r2_max)*(12.0f*adc_report.channel_value[channel]/(5.0f-adc_report.channel_value[channel])) - range_max/2.0f) + bias;
+			payload_angle_report.payload_angle_filtered = -((range_max/r2_max)*(12.0f*adc_voltage/(5.0f-adc_voltage)) - range_max/2.0f) + bias;
 			if(payload_angle_topic != nullptr)
 			{
 				payload_angle_report.timestamp = hrt_absolute_time();
 				orb_publish(ORB_ID(payload_angle), payload_angle_topic, &payload_angle_report);
 			}
+
+			last_time = current_time;
 		}
 	}
 
