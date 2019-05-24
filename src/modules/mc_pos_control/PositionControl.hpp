@@ -204,6 +204,7 @@ private:
 
 	void _positionController(); /** applies the P-position-controller */
 	void _velocityController(const float &dt); /** applies the PID-velocity-controller */
+	float _adaptiveDirectMRACUnnormalized(float T, float r, float yp); /** applies adaptive unnormalized direct MRAC for swinging payload */
 	void _setCtrlFlagTrue(); /**< set control-loop flags to true (only required for logging) */
 	void _setCtrlFlagFalse(); /**< set control-loop flags to false (only required for logging) */
 
@@ -223,6 +224,40 @@ private:
 	bool _skip_controller{false}; /**< skips position/velocity controller. true for stabilized mode */
 	bool _ctrl_pos[3] = {true, true, true}; /**< True if the control-loop for position was used */
 	bool _ctrl_vel[3] = {true, true, true}; /**< True if the control-loop for velocity was used */
+
+	// Adaptive Controller
+	// Constants
+	const float w = 1.2;
+	const float z = 0.8;
+	const float zm = 5;
+	const float l = 100;
+
+	const float sgn_k = 1;
+
+	const float adap_gain_w11 = 100;
+	const float adap_gain_w12 = 100;
+	const float adap_gain_w21 = 100;
+	const float adap_gain_w22 = 100;
+	const float adap_gain_yp = 0.02;
+	const float adap_gain_r = 0.02;
+
+	const float the11_init = 105.0f;
+	const float the12_init = 490.1934f;
+	const float the21_init = 377.0628f;
+	const float the22_init = 1821.7f;
+	const float the3_init = -3.6538f;
+	const float c0_init = 0.0103;
+
+	// Global variables.
+	float r1, r2;
+	float yp1, yp2;
+	float u_prev, u_prev1, u_prev2;
+	float ym1, ym2;
+	float w11_1, w11_2, w12_1, w12_2, w21_1, w21_2, w22_1, w22_2;
+
+	float the11, the12, the21, the22, the3, c0;
+
+	bool enable_adaptive;
 
 	DEFINE_PARAMETERS(
 		(ParamFloat<px4::params::MPC_THR_MAX>) MPC_THR_MAX,

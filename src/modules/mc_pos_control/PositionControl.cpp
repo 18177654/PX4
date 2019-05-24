@@ -45,7 +45,34 @@ using namespace matrix;
 
 PositionControl::PositionControl(ModuleParams *parent) :
 	ModuleParams(parent)
-{}
+{
+	r1 = 0;
+    r2 = 0;
+    yp1 = 0;
+    yp2 = 0;
+    u_prev = 0;
+    u_prev1 = 0;
+    u_prev2 = 0;
+    ym1 = 0;
+    ym2 = 0;
+    w11_1 = 0;
+    w11_2 = 0;
+    w12_1 = 0;
+    w12_2 = 0;
+    w21_1 = 0;
+    w21_2 = 0;
+    w22_1 = 0;
+    w22_2 = 0;
+    
+    the11 = the11_init;
+    the12 = the12_init;
+    the21 = the21_init;
+    the22 = the22_init;
+    the3 = the3_init;
+    c0 = c0_init;
+
+	enable_adaptive = false;
+}
 
 void PositionControl::updateState(const PositionControlStates &states)
 {
@@ -222,7 +249,16 @@ bool PositionControl::_interfaceMapping()
 void PositionControl::_positionController()
 {
 	// P-position controller
-	const Vector3f vel_sp_position = (_pos_sp - _pos).emult(Vector3f(MPC_XY_P.get(), MPC_XY_P.get(), MPC_Z_P.get()));
+	Vector3f vel_sp_position;
+	if(enable_adaptive)
+	{
+		vel_sp_position = (_pos_sp - _pos).emult(Vector3f(0.4, MPC_XY_P.get(), MPC_Z_P.get()));
+	}
+	else
+	{
+		vel_sp_position = (_pos_sp - _pos).emult(Vector3f(MPC_XY_P.get(), MPC_XY_P.get(), MPC_Z_P.get()));
+	}
+	
 	_vel_sp = vel_sp_position + _vel_sp;
 
 	// Constrain horizontal velocity by prioritizing the velocity component along the
@@ -295,7 +331,14 @@ void PositionControl::_velocityController(const float &dt)
 	} else {
 		// PID-velocity controller for NE-direction.
 		Vector2f thrust_desired_NE;
-		thrust_desired_NE(0) = MPC_XY_VEL_P.get() * vel_err(0) + MPC_XY_VEL_D.get() * _vel_dot(0) + _thr_int(0);
+		if(enable_adaptive)
+		{
+			thrust_desired_NE(0) = _adaptiveDirectMRACUnnormalized(dt, _vel_sp(0), _vel(0));
+		}
+		else
+		{
+			thrust_desired_NE(0) = MPC_XY_VEL_P.get() * vel_err(0) + MPC_XY_VEL_D.get() * _vel_dot(0) + _thr_int(0);	
+		}
 		thrust_desired_NE(1) = MPC_XY_VEL_P.get() * vel_err(1) + MPC_XY_VEL_D.get() * _vel_dot(1) + _thr_int(1);
 
 		// Get maximum allowed thrust in NE based on tilt and excess thrust.
@@ -325,6 +368,66 @@ void PositionControl::_velocityController(const float &dt)
 		_thr_int(0) += MPC_XY_VEL_I.get() * vel_err_lim(0) * dt;
 		_thr_int(1) += MPC_XY_VEL_I.get() * vel_err_lim(1) * dt;
 	}
+}
+
+float PositionControl::_adaptiveDirectMRACUnnormalized(float T, float r, float yp)
+{
+	// Variables
+	float ym, u;
+    float e1, w11, w12, w21, w22;
+    float the11_dt, the12_dt, the21_dt, the22_dt, the3_dt, c0_dt;
+
+    // Reference model output
+    ym = (-(2*w*w*T*T-8)*ym1 - (4-4*z*w*T+w*w*T*T)*ym2 + (w*w/zm)*((2*T+zm*T*T)*r + (2*zm*T*T)*r1 + (zm*T*T-2*T)*r2))/(4+4*z*w*T+w*w*T*T);
+
+    // Error
+    e1 = yp - ym;
+    
+    // States
+    w11 = (-(2*l*zm*T*T-8)*w11_1 - (4-2*T*(l+zm)+l*zm*T*T)*w11_2 + (2*T)*u_prev + (-2*T)*u_prev2)/(4+2*T*(l+zm)+l*zm*T*T);
+    w12 = (-(2*l*zm*T*T-8)*w12_1 - (4-2*T*(l+zm)+l*zm*T*T)*w12_2 + (T*T)*u_prev +(2*T*T)*u_prev1 + (T*T)*u_prev2)/(4+2*T*(l+zm)+l*zm*T*T);
+    w21 = (-(2*l*zm*T*T-8)*w21_1 - (4-2*T*(l+zm)+l*zm*T*T)*w21_2 + (2*T)*yp + (-2*T)*yp2)/(4+2*T*(l+zm)+l*zm*T*T);
+    w22 = (-(2*l*zm*T*T-8)*w22_1 - (4-2*T*(l+zm)+l*zm*T*T)*w22_2 + (T*T)*yp +(2*T*T)*yp1 + (T*T)*yp2)/(4+2*T*(l+zm)+l*zm*T*T);
+    
+    // Parameters
+    the11_dt = -adap_gain_w11*e1*w11*sgn_k;
+    the12_dt = -adap_gain_w12*e1*w12*sgn_k;
+    the21_dt = -adap_gain_w21*e1*w21*sgn_k;
+    the22_dt = -adap_gain_w22*e1*w22*sgn_k;
+    the3_dt = -adap_gain_yp*e1*yp*sgn_k;
+    c0_dt = -adap_gain_r*e1*r*sgn_k;
+    
+    // Integrate
+    the11 = the11 + the11_dt*T;
+    the12 = the12 + the12_dt*T;
+    the21 = the21 + the21_dt*T;
+    the22 = the22 + the22_dt*T;
+    the3 = the3 + the3_dt*T;
+    c0 = c0 + c0_dt*T;
+    
+    // Control Signal
+    u = the11*w11 + the12*w12 + the21*w21 + the22*w22 + the3*yp + c0*r;
+    
+    // Update delayed signals
+    r2 = r1;
+    r1 = r;
+    yp2 = yp1;
+    yp1 = yp;
+    u_prev2 = u_prev1;
+    u_prev1 = u_prev;
+    u_prev = u/125.5251f;
+    ym2 = ym1;
+    ym1 = ym;
+    w11_2 = w11_1;
+    w11_1 = w11;
+    w12_2 = w12_1;
+    w12_1 = w12;
+    w21_2 = w21_1;
+    w21_1 = w21;
+    w22_2 = w22_1;
+    w22_1 = w22;
+
+	return u;
 }
 
 void PositionControl::updateConstraints(const vehicle_constraints_s &constraints)
