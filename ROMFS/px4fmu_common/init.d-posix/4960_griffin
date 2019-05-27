@@ -9,10 +9,14 @@
 sh /etc/init.d/rc.mc_defaults
 
 param set BAT_N_CELLS 6
+param set BAT_A_PER_V 37.5
+param set BAT_V_DIV 12.7
+param set BAT_V_OFFS_CURR 0.525
 
 param set MIS_TAKEOFF_ALT 2.5
 param set RTL_DESCEND_ALT 10
 
+param set IMU_GYRO_CUTOFF 80.0
 param set MC_DTERM_CUTOFF 30.0
 
 param set MC_ROLL_P 5
@@ -74,5 +78,8 @@ param set PWM_MAIN_SCALE1 1.01315789
 param set PWM_MAIN_SCALE2 1.00442478
 param set PWM_MAIN_SCALE3 1.00074019
 param set PWM_MAIN_SCALE4 1.00000000
+
+param set RTL_DESCEND_ALT 10.0
+param set RTL_RETURN_ALT 10.0
 
 set MIXER quad_x
