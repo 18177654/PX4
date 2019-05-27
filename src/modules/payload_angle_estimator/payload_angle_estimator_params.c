@@ -1,6 +1,6 @@
 /****************************************************************************
  *
- *   Copyright (c) 2018 PX4 Development Team. All rights reserved.
+ *   Copyright (c) 2013-2016 PX4 Development Team. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -31,45 +31,31 @@
  *
  ****************************************************************************/
 
-#pragma once
+/**
+ * @file payload_angle_estimator_params.c
+ * Payload angle parameters.
+ *
+ * @author Anton Erasmus <18177654@sun.ac.za>
+ */
 
-#include <px4_module.h>
-#include <px4_module_params.h>
+/**
+ * Bias the payload angle for the estimator to measure 0 degrees when payload has no angle.
+ *
+ * @min -180.0
+ * @max 180.0
+ * @decimal 2
+ * @increment 0.01
+ * @group Payload Angle
+ */
+PARAM_DEFINE_FLOAT(PAYLOAD_BIAS, -14.5f);
 
-extern "C" __EXPORT int payload_angle_estimator_main(int argc, char *argv[]);
-
-class PayloadAngleEstimator : public ModuleBase<PayloadAngleEstimator>, public ModuleParams
-{
-public:
-	PayloadAngleEstimator();
-
-	virtual ~PayloadAngleEstimator() = default;
-
-	/** @see ModuleBase */
-	static int task_spawn(int argc, char *argv[]);
-
-	/** @see ModuleBase */
-	static PayloadAngleEstimator *instantiate(int argc, char *argv[]);
-
-	/** @see ModuleBase */
-	static int custom_command(int argc, char *argv[]);
-
-	/** @see ModuleBase */
-	static int print_usage(const char *reason = nullptr);
-
-	/** @see ModuleBase::run() */
-	void run() override;
-
-	/** @see ModuleBase::print_status() */
-	int print_status() override;
-
-protected:
-
-	void updateParams() override;
-
-	DEFINE_PARAMETERS(
-		(ParamFloat<px4::params::PAYLOAD_BIAS>) PAYLOAD_BIAS,
-		(ParamFloat<px4::params::PAYLOAD_CUTOFF>) PAYLOAD_CUTOFF
-	)
-};
-
+/**
+ * The cutoff frequency of the lowpass filter for the angle measurements (in hertz).
+ *
+ * @min 0.1
+ * @max 100.0
+ * @decimal 2
+ * @increment 0.01
+ * @group Payload Angle
+ */
+PARAM_DEFINE_FLOAT(PAYLOAD_CUTOFF, 1.0f);

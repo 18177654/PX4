@@ -115,6 +115,16 @@ PayloadAngleEstimator::PayloadAngleEstimator()
 {
 }
 
+void PayloadAngleEstimator::updateParams()
+{
+	ModuleParams::updateParams();
+
+	// Tilt needs to be in radians
+	PAYLOAD_BIAS.set(PAYLOAD_BIAS.get());
+	PAYLOAD_CUTOFF.set(PAYLOAD_CUTOFF.get());
+}
+
+
 void PayloadAngleEstimator::run()
 {
 	// Subscribe to adc_report
@@ -137,10 +147,8 @@ void PayloadAngleEstimator::run()
 	float v_out_max = 2.8206f;
 	float r2_max = 12.0f*v_out_max/(5.0f - v_out_max);
 	float range_max = 270.0f;
-	float bias = -14.5;
 
 	uint8_t channel = 3;
-	float cutoff_hz = 1.0f;
 
 	// Variables.
 	hrt_abstime last_time = hrt_absolute_time();
@@ -170,7 +178,7 @@ void PayloadAngleEstimator::run()
 			// Lowpass filter the measurement
 			hrt_abstime current_time = hrt_absolute_time();
 
-			float RC = 1.0f/(cutoff_hz*2.0f*3.14f);
+			float RC = 1.0f/(PAYLOAD_CUTOFF.get()*2.0f*3.14f);
 			float dt = (current_time - last_time)*1.0e-6f;
 			float alpha = dt/(RC+dt);
 			
@@ -185,8 +193,8 @@ void PayloadAngleEstimator::run()
 				adc_voltage = adc_voltage + (alpha*(adc_report.channel_value[channel] - adc_voltage));
 			}
 
-			payload_angle_report.payload_angle = -((range_max/r2_max)*(12.0f*adc_report.channel_value[channel]/(5.0f-adc_report.channel_value[channel])) - range_max/2.0f) + bias;
-			payload_angle_report.payload_angle_filtered = -((range_max/r2_max)*(12.0f*adc_voltage/(5.0f-adc_voltage)) - range_max/2.0f) + bias;
+			payload_angle_report.payload_angle = -((range_max/r2_max)*(12.0f*adc_report.channel_value[channel]/(5.0f-adc_report.channel_value[channel])) - range_max/2.0f) + PAYLOAD_BIAS.get();
+			payload_angle_report.payload_angle_filtered = -((range_max/r2_max)*(12.0f*adc_voltage/(5.0f-adc_voltage)) - range_max/2.0f) + PAYLOAD_BIAS.get();
 			if(payload_angle_topic != nullptr)
 			{
 				payload_angle_report.timestamp = hrt_absolute_time();

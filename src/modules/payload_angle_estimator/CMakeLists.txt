@@ -34,7 +34,7 @@
 px4_add_module(
 	MODULE modules__payload_angle_estimator
 	MAIN payload_angle_estimator
-	STACK_MAIN 1024
+	STACK_MAIN 2000
 	SRCS
 		payload_angle_estimator.cpp
 	DEPENDS
