@@ -1,0 +1,19 @@
+#
+# This defines a single mixer for a quadrotor in the X configuration. All controls
+# are mixed 100%. These control PWM outputs 1,2,3,4
+#
+R: 4x 10000 10000 10000 0
+
+#
+# Null mixers for placeholders for PWM outputs 5,6,7
+#
+Z:
+Z:
+Z:
+
+#
+# Landing gear mixer for PWM output 8
+#
+M: 1
+O:      10000  10000      0 -10000  10000
+S: 0 7  10000  10000      0 -10000  10000

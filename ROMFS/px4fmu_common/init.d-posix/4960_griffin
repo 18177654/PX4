@@ -82,4 +82,4 @@ param set PWM_MAIN_SCALE4 1.00000000
 param set RTL_DESCEND_ALT 10.0
 param set RTL_RETURN_ALT 10.0
 
-set MIXER quad_x
+set MIXER griffin
