@@ -103,4 +103,4 @@ param set PWM_MAIN_SCALE2 1.00442478
 param set PWM_MAIN_SCALE3 1.00074019
 param set PWM_MAIN_SCALE4 1.00000000
 
-set MIXER quad_x
+set MIXER griffin

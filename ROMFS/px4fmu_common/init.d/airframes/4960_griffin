@@ -123,7 +123,5 @@ then
 	payload_angle_estimator start
 fi
 
-set MIXER quad_x
-set MIXER_AUX mount_legs
-
-set PWM_OUT 1234
+set MIXER griffin
+set PWM_OUT 12345678
