@@ -1,0 +1,17 @@
+#!nsh
+#
+# @name Honeybee HIL
+#
+# @type Simulation
+# @class Copter
+#
+# @output MAIN1 motor 1
+# @output MAIN2 motor 2
+# @output MAIN3 motor 3
+# @output MAIN4 motor 4
+#
+
+sh /etc/init.d/airframes/4220_honeybee
+
+set PWM_OUT 1234
+param set SYS_HITL 1
