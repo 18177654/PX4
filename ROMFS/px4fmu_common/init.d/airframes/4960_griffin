@@ -84,6 +84,9 @@ then
 	param set PWM_MAIN_SCALE2 1.00442478
 	param set PWM_MAIN_SCALE3 1.00074019
 	param set PWM_MAIN_SCALE4 1.00000000
+
+	param set PAYLOAD_BIAS -14.5
+	param set PAYLOAD_CUTOFF 1.0
 fi
 
 mavlink stop-all
@@ -92,6 +95,7 @@ mavlink start -d /dev/ttyS1 -b 921600 -r 20000
 if param compare SYS_HITL 0
 then
 	motor_current_mcp3428 start
+	payload_angle_estimator start
 fi
 
 set MIXER quad_x

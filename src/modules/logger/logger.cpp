@@ -670,6 +670,7 @@ void Logger::add_default_topics()
 	add_topic("vehicle_local_position", 100);
 	add_topic("vehicle_local_position_setpoint", 100);
 	add_topic("motor_current", 50);
+	add_topic("payload_angle", 50);
 #endif /* CONFIG_ARCH_BOARD_PX4_SITL */
 
 #ifdef CONFIG_ARCH_BOARD_PX4_SITL
