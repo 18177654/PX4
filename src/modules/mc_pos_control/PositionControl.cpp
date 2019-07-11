@@ -45,7 +45,48 @@ using namespace matrix;
 
 PositionControl::PositionControl(ModuleParams *parent) :
 	ModuleParams(parent)
-{}
+{
+	r1 = 0;
+	r2 = 0;
+	yp1 = 0;
+	yp2 = 0;
+	u_prev = 0;
+	u_prev1 = 0;
+	u_prev2 = 0;
+	ym1 = 0;
+	ym2 = 0;
+	w11_1 = 0;
+	w11_2 = 0;
+	w12_1 = 0;
+	w12_2 = 0;
+	w21_1 = 0;
+	w21_2 = 0;
+	w22_1 = 0;
+	w22_2 = 0;
+
+	uf1 = 0;
+	uf2 = 0;
+	phi11_1 = 0;
+	phi11_2 = 0;
+	phi12_1 = 0;
+	phi12_2 = 0;
+	phi21_1 = 0;
+	phi21_2 = 0;
+	phi22_1 = 0;
+	phi22_2 = 0;
+	phi3_1 = 0;
+	phi3_2 = 0;
+	phi4_1 = 0;
+	phi4_2 = 0;
+
+	the11 = MRAC_INIT_THE11.get();
+	the12 = MRAC_INIT_THE12.get();
+	the21 = MRAC_INIT_THE21.get();
+	the22 = MRAC_INIT_THE22.get();
+	the3 = MRAC_INIT_THE3.get();
+	c0 = MRAC_INIT_C0.get();
+	rho = 1/(MRAC_INIT_C0.get() * 125.5251f);
+}
 
 void PositionControl::updateState(const PositionControlStates &states)
 {
@@ -104,7 +145,7 @@ void PositionControl::generateThrustYawSetpoint(const float dt)
 		_acc_sp = _acc;
 
 	} else {
-		_positionController();
+		_positionController(dt);
 		_velocityController(dt);
 	}
 }
@@ -144,6 +185,7 @@ bool PositionControl::_interfaceMapping()
 			// Set integral states and setpoints to 0
 			_pos_sp(i) = _pos(i) = 0.0f;
 			_ctrl_pos[i] = false; // position control-loop is not used
+			_pos_int(i) = 0.0f;
 
 			// thrust setpoint is not supported in velocity control
 			_thr_sp(i) = NAN;
@@ -163,6 +205,7 @@ bool PositionControl::_interfaceMapping()
 
 			// Reset the Integral term.
 			_thr_int(i) = 0.0f;
+			_pos_int(i) = 0.0f;
 			// Don't require velocity derivative.
 			_vel_dot(i) = 0.0f;
 
@@ -212,12 +255,25 @@ bool PositionControl::_interfaceMapping()
 	return !(failsafe);
 }
 
-void PositionControl::_positionController()
+void PositionControl::_positionController(const float &dt)
 {
 	// P-position controller
-	const Vector3f vel_sp_position = (_pos_sp - _pos).emult(Vector3f(_param_mpc_xy_p.get(), _param_mpc_xy_p.get(),
-					 _param_mpc_z_p.get()));
-	_vel_sp = vel_sp_position + _vel_sp;
+	Vector3f vel_sp_position;
+	if(MPC_X_ADAPTIVE.get() > 0)
+	{
+		// Proportional
+		vel_sp_position = (_pos_sp - _pos).emult(Vector3f(MPC_X_ADAPTIVE_P.get(), _param_mpc_xy_p.get(), _param_mpc_z_p.get()));
+
+		// Integral
+		_pos_int(0) = _pos_int(0) + (_pos_sp(0) - _pos(0)) * MPC_X_ADAPTIVE_I.get() * dt;
+		vel_sp_position(0) = vel_sp_position(0) + _pos_int(0);
+	}
+	else
+	{
+		vel_sp_position = (_pos_sp - _pos).emult(Vector3f(_param_mpc_xy_p.get(), _param_mpc_xy_p.get(),
+				    _param_mpc_z_p.get()));
+		_vel_sp = vel_sp_position + _vel_sp;
+	}
 
 	// Constrain horizontal velocity by prioritizing the velocity component along the
 	// the desired position setpoint over the feed-forward term.
@@ -292,7 +348,15 @@ void PositionControl::_velocityController(const float &dt)
 	} else {
 		// PID-velocity controller for NE-direction.
 		Vector2f thrust_desired_NE;
-		thrust_desired_NE(0) = _param_mpc_xy_vel_p.get() * vel_err(0) + _param_mpc_xy_vel_d.get() * _vel_dot(0) + _thr_int(0);
+		if(MPC_X_ADAPTIVE.get() > 0)
+		{
+			thrust_desired_NE(0) = _adaptiveDirectMRACNormalized(dt, _vel_sp(0), _vel(0), false);
+		}
+		else
+		{
+			thrust_desired_NE(0) = _param_mpc_xy_vel_p.get() * vel_err(0) + _param_mpc_xy_vel_d.get() * _vel_dot(0) + _thr_int(0);
+			_adaptiveDirectMRACNormalized(dt, _vel_sp(0), _vel(0), true); // Initialize variables of adaptive controller
+		}
 		thrust_desired_NE(1) = _param_mpc_xy_vel_p.get() * vel_err(1) + _param_mpc_xy_vel_d.get() * _vel_dot(1) + _thr_int(1);
 
 		// Get maximum allowed thrust in NE based on tilt and excess thrust.
@@ -322,6 +386,147 @@ void PositionControl::_velocityController(const float &dt)
 		_thr_int(0) += _param_mpc_xy_vel_i.get() * vel_err_lim(0) * dt;
 		_thr_int(1) += _param_mpc_xy_vel_i.get() * vel_err_lim(1) * dt;
 	}
+}
+
+float PositionControl::_adaptiveDirectMRACNormalized(float T, float r, float yp, bool dryrun)
+{
+	// Parameters
+	float w = MRAC_WN.get();
+	float z = MRAC_ZETA.get();
+	float zm = MRAC_ZERO.get();
+	float l = MRAC_LAMBDA.get();
+	int32_t sgn_k = MRAC_SGN_K.get();
+
+	float adap_margin = MRAC_ADAP_MARGIN.get();
+	float leak = MRAC_LEAKAGE.get();
+
+	float adap_gain_w11 = MRAC_GAIN_W11.get();
+	float adap_gain_w12 = MRAC_GAIN_W12.get();
+	float adap_gain_w21 = MRAC_GAIN_W21.get();
+	float adap_gain_w22 = MRAC_GAIN_W22.get();
+	float adap_gain_yp = MRAC_GAIN_YP.get();
+	float adap_gain_r = MRAC_GAIN_R.get();
+
+	float the11_init = MRAC_INIT_THE11.get();
+	float the12_init = MRAC_INIT_THE12.get();
+	float the21_init = MRAC_INIT_THE21.get();
+	float the22_init = MRAC_INIT_THE22.get();
+	float the3_init = MRAC_INIT_THE3.get();
+	float c0_init = MRAC_INIT_C0.get();
+
+	// Variables
+	float u;
+	float ym;
+	float e1, w11, w12, w21, w22;
+	float uf, phi11, phi12, phi21, phi22, phi3, phi4;
+	float ns2, m2;
+	float e1_hat, err;
+	float the11_dt, the12_dt, the21_dt, the22_dt, the3_dt, c0_dt;
+
+	// Reference model output
+	ym = (-(2*w*w*T*T-8)*ym1 - (4-4*z*w*T+w*w*T*T)*ym2 + (w*w/zm)*((2*T+zm*T*T)*r + (2*zm*T*T)*r1 + (zm*T*T-2*T)*r2))/(4+4*z*w*T+w*w*T*T);
+
+	// Error
+	if(!dryrun)
+	{
+    		e1 = yp - ym;
+	}
+	else
+	{
+		e1 = 0;
+	}
+
+
+	// States
+	w11 = (-(2*l*zm*T*T-8)*w11_1 - (4-2*T*(l+zm)+l*zm*T*T)*w11_2 + (2*T)*u_prev + (-2*T)*u_prev2)/(4+2*T*(l+zm)+l*zm*T*T);
+	w12 = (-(2*l*zm*T*T-8)*w12_1 - (4-2*T*(l+zm)+l*zm*T*T)*w12_2 + (T*T)*u_prev +(2*T*T)*u_prev1 + (T*T)*u_prev2)/(4+2*T*(l+zm)+l*zm*T*T);
+	w21 = (-(2*l*zm*T*T-8)*w21_1 - (4-2*T*(l+zm)+l*zm*T*T)*w21_2 + (2*T)*yp + (-2*T)*yp2)/(4+2*T*(l+zm)+l*zm*T*T);
+	w22 = (-(2*l*zm*T*T-8)*w22_1 - (4-2*T*(l+zm)+l*zm*T*T)*w22_2 + (T*T)*yp +(2*T*T)*yp1 + (T*T)*yp2)/(4+2*T*(l+zm)+l*zm*T*T);
+
+	// Normalize
+	uf = (-(2*w*w*T*T-8)*uf1 - (4-4*z*w*T+w*w*T*T)*uf2 + (w*w/zm)*((2*T+zm*T*T)*u_prev + (2*zm*T*T)*u_prev1 + (zm*T*T-2*T)*u_prev2))/(4+4*z*w*T+w*w*T*T);
+
+	phi11 = (-(2*w*w*T*T-8)*phi11_1 - (4-4*z*w*T+w*w*T*T)*phi11_2 + (w*w/zm)*((2*T+zm*T*T)*w11 + (2*zm*T*T)*w11_1 + (zm*T*T-2*T)*w11_2))/(4+4*z*w*T+w*w*T*T);
+	phi12 = (-(2*w*w*T*T-8)*phi12_1 - (4-4*z*w*T+w*w*T*T)*phi12_2 + (w*w/zm)*((2*T+zm*T*T)*w12 + (2*zm*T*T)*w12_1 + (zm*T*T-2*T)*w12_2))/(4+4*z*w*T+w*w*T*T);
+	phi21 = (-(2*w*w*T*T-8)*phi21_1 - (4-4*z*w*T+w*w*T*T)*phi21_2 + (w*w/zm)*((2*T+zm*T*T)*w21 + (2*zm*T*T)*w21_1 + (zm*T*T-2*T)*w21_2))/(4+4*z*w*T+w*w*T*T);
+	phi22 = (-(2*w*w*T*T-8)*phi22_1 - (4-4*z*w*T+w*w*T*T)*phi22_2 + (w*w/zm)*((2*T+zm*T*T)*w22 + (2*zm*T*T)*w22_1 + (zm*T*T-2*T)*w22_2))/(4+4*z*w*T+w*w*T*T);
+	phi3 = (-(2*w*w*T*T-8)*phi3_1 - (4-4*z*w*T+w*w*T*T)*phi3_2 + (w*w/zm)*((2*T+zm*T*T)*yp + (2*zm*T*T)*yp1 + (zm*T*T-2*T)*yp2))/(4+4*z*w*T+w*w*T*T);
+	phi4 = (-(2*w*w*T*T-8)*phi4_1 - (4-4*z*w*T+w*w*T*T)*phi4_2 + (w*w/zm)*((2*T+zm*T*T)*r + (2*zm*T*T)*r1 + (zm*T*T-2*T)*r2))/(4+4*z*w*T+w*w*T*T);
+
+	ns2 = phi11*phi11 + phi12*phi12 + phi21*phi21 + phi22*phi22 + phi3*phi3 + phi4*phi4 + uf*uf;
+	m2 = 1 + ns2;
+	e1_hat = rho*(uf - the11*phi11 + the12*phi12 + the21*phi21 + the22*phi22 + the3*phi3 + c0*phi4);
+	err = (e1 - e1_hat)/m2;
+
+	// Dead zone
+	if(err < -adap_margin)
+	{
+		err = err + adap_margin;
+	}
+	else if(err > adap_margin)
+	{
+		err = err - adap_margin;
+	}
+	else
+	{
+		err = 0;
+	}
+
+	// Parameters with leakage
+	the11_dt = adap_gain_w11*(-err*phi11*sgn_k - leak*(the11 - the11_init));
+	the12_dt = adap_gain_w12*(-err*phi12*sgn_k - leak*(the12 - the12_init));
+	the21_dt = adap_gain_w21*(-err*phi21*sgn_k - leak*(the21 - the21_init));
+	the22_dt = adap_gain_w22*(-err*phi22*sgn_k - leak*(the22 - the22_init));
+	the3_dt = adap_gain_yp*(-err*phi3*sgn_k - leak*(the3 - the3_init));
+	c0_dt = adap_gain_r*(-err*phi4*sgn_k - leak*(c0 - c0_init));
+
+	// Integrate
+	the11 = the11 + the11_dt*T;
+	the12 = the12 + the12_dt*T;
+	the21 = the21 + the21_dt*T;
+	the22 = the22 + the22_dt*T;
+	the3 = the3 + the3_dt*T;
+	c0 = c0 + c0_dt*T;
+	rho = rho + MRAC_GAIN_RHO.get()*err*(uf - the11*phi11 + the12*phi12 + the21*phi21 + the22*phi22 + the3*phi3 + c0*phi4)*T;
+
+	// Control Signal
+	u = the11*w11 + the12*w12 + the21*w21 + the22*w22 + the3*yp + c0*r;
+
+	// Update delayed signals
+	r2 = r1;
+	r1 = r;
+	yp2 = yp1;
+	yp1 = yp;
+	u_prev2 = u_prev1;
+	u_prev1 = u_prev;
+	u_prev = u/125.5251f;
+	ym2 = ym1;
+	ym1 = ym;
+	w11_2 = w11_1;
+	w11_1 = w11;
+	w12_2 = w12_1;
+	w12_1 = w12;
+	w21_2 = w21_1;
+	w21_1 = w21;
+	w22_2 = w22_1;
+	w22_1 = w22;
+
+	uf2 = uf1;
+	uf1 = uf;
+	phi11_2 = phi11_1;
+	phi11_1 = phi11;
+	phi12_2 = phi12_1;
+	phi12_1 = phi12;
+	phi21_2 = phi21_1;
+	phi21_1 = phi21;
+	phi22_2 = phi22_1;
+	phi22_1 = phi22;
+	phi3_2 = phi3_1;
+	phi3_1 = phi3;
+	phi4_2 = phi4_1;
+	phi4_1 = phi4;
+
+	return u;
 }
 
 void PositionControl::updateConstraints(const vehicle_constraints_s &constraints)

@@ -39,8 +39,9 @@ px4_add_romfs_files(
 	1001_rc_quad_x.hil
 	1002_standard_vtol.hil
 	1004_griffin.hil
+	1005_griffin_payload.hil
 	1100_rc_quad_x_sih.hil
-	
+
 	# [2000, 2999] Standard planes"
 	2100_standard_plane
 	2105_maja
@@ -87,6 +88,7 @@ px4_add_romfs_files(
 	4250_teal
 	4900_crazyflie
 	4960_griffin
+	4960_griffin_payload
 
 	# [5000, 5999] Quadrotor +"
 	5001_quad_+
@@ -138,7 +140,7 @@ px4_add_romfs_files(
 	15001_coax_heli
 
 	16001_helicopter
-	
+
 	24001_dodeca_cox
 
 	50000_generic_ground_vehicle

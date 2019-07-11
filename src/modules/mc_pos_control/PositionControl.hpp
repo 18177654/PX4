@@ -202,8 +202,9 @@ private:
 	 */
 	bool _interfaceMapping();
 
-	void _positionController(); /** applies the P-position-controller */
+	void _positionController(const float &dt); /** applies the P-position-controller */
 	void _velocityController(const float &dt); /** applies the PID-velocity-controller */
+	float _adaptiveDirectMRACNormalized(float T, float r, float yp, bool dryrun); /** applies adaptive normalized direct MRAC for swinging payload */
 	void _setCtrlFlag(bool value); /**< set control-loop flags (only required for logging) */
 
 	matrix::Vector3f _pos{}; /**< MC position */
@@ -217,11 +218,25 @@ private:
 	matrix::Vector3f _thr_sp{}; /**< desired thrust */
 	float _yaw_sp{}; /**< desired yaw */
 	float _yawspeed_sp{}; /** desired yaw-speed */
+	matrix::Vector3f _pos_int{}; /**< thrust integral term */
 	matrix::Vector3f _thr_int{}; /**< thrust integral term */
 	vehicle_constraints_s _constraints{}; /**< variable constraints */
 	bool _skip_controller{false}; /**< skips position/velocity controller. true for stabilized mode */
 	bool _ctrl_pos[3] = {true, true, true}; /**< True if the control-loop for position was used */
 	bool _ctrl_vel[3] = {true, true, true}; /**< True if the control-loop for velocity was used */
+
+	// Adaptive Controller global variables.
+	float r1, r2;
+	float yp1, yp2;
+	float u_prev, u_prev1, u_prev2;
+	float ym1, ym2;
+	float w11_1, w11_2, w12_1, w12_2, w21_1, w21_2, w22_1, w22_2;
+
+	float uf1, uf2;
+	float phi11_1, phi11_2, phi12_1, phi12_2, phi21_1, phi21_2, phi22_1, phi22_2, phi3_1, phi3_2, phi4_1, phi4_2;
+	float rho;
+
+	float the11, the12, the21, the22, the3, c0;
 
 	DEFINE_PARAMETERS(
 		(ParamFloat<px4::params::MPC_THR_MAX>) _param_mpc_thr_max,
@@ -240,6 +255,29 @@ private:
 		(ParamFloat<px4::params::MPC_Z_VEL_I>) _param_mpc_z_vel_i,
 		(ParamFloat<px4::params::MPC_Z_VEL_D>) _param_mpc_z_vel_d,
 		(ParamFloat<px4::params::MPC_XY_P>) _param_mpc_xy_p,
+		(ParamInt<px4::params::MPC_X_ADAPTIVE>) MPC_X_ADAPTIVE,
+		(ParamFloat<px4::params::MPC_X_ADAPTIVE_P>) MPC_X_ADAPTIVE_P,
+		(ParamFloat<px4::params::MPC_X_ADAPTIVE_I>) MPC_X_ADAPTIVE_I,
+		(ParamFloat<px4::params::MRAC_WN>) MRAC_WN,
+		(ParamFloat<px4::params::MRAC_ZETA>) MRAC_ZETA,
+		(ParamFloat<px4::params::MRAC_ZERO>) MRAC_ZERO,
+		(ParamInt<px4::params::MRAC_SGN_K>) MRAC_SGN_K,
+		(ParamFloat<px4::params::MRAC_LAMBDA>) MRAC_LAMBDA,
+		(ParamFloat<px4::params::MRAC_GAIN_W11>) MRAC_GAIN_W11,
+		(ParamFloat<px4::params::MRAC_GAIN_W12>) MRAC_GAIN_W12,
+		(ParamFloat<px4::params::MRAC_GAIN_W21>) MRAC_GAIN_W21,
+		(ParamFloat<px4::params::MRAC_GAIN_W22>) MRAC_GAIN_W22,
+		(ParamFloat<px4::params::MRAC_GAIN_YP>) MRAC_GAIN_YP,
+		(ParamFloat<px4::params::MRAC_GAIN_R>) MRAC_GAIN_R,
+		(ParamFloat<px4::params::MRAC_GAIN_RHO>) MRAC_GAIN_RHO,
+		(ParamFloat<px4::params::MRAC_INIT_THE11>) MRAC_INIT_THE11,
+		(ParamFloat<px4::params::MRAC_INIT_THE12>) MRAC_INIT_THE12,
+		(ParamFloat<px4::params::MRAC_INIT_THE21>) MRAC_INIT_THE21,
+		(ParamFloat<px4::params::MRAC_INIT_THE22>) MRAC_INIT_THE22,
+		(ParamFloat<px4::params::MRAC_INIT_THE3>) MRAC_INIT_THE3,
+		(ParamFloat<px4::params::MRAC_INIT_C0>) MRAC_INIT_C0,
+		(ParamFloat<px4::params::MRAC_ADAP_MARGIN>) MRAC_ADAP_MARGIN,
+		(ParamFloat<px4::params::MRAC_LEAKAGE>) MRAC_LEAKAGE,
 		(ParamFloat<px4::params::MPC_XY_VEL_P>) _param_mpc_xy_vel_p,
 		(ParamFloat<px4::params::MPC_XY_VEL_I>) _param_mpc_xy_vel_i,
 		(ParamFloat<px4::params::MPC_XY_VEL_D>) _param_mpc_xy_vel_d
