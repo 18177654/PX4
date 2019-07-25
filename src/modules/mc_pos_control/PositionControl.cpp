@@ -257,23 +257,28 @@ bool PositionControl::_interfaceMapping()
 
 void PositionControl::_positionController(const float &dt)
 {
-	// P-position controller
+	// Position controller
 	Vector3f vel_sp_position;
+
+	float gain_xp = MPC_X_P.get();
+	float gain_xi = MPC_X_I.get();
+
 	if(MPC_X_ADAPTIVE.get() > 0)
 	{
-		// Proportional
-		vel_sp_position = (_pos_sp - _pos).emult(Vector3f(MPC_X_ADAPTIVE_P.get(), _param_mpc_xy_p.get(), _param_mpc_z_p.get()));
+		gain_xp = MPC_ADAPTIVE_X_P.get();
+		gain_xi = MPC_ADAPTIVE_X_I.get();
+	}
 
-		// Integral
-		_pos_int(0) = _pos_int(0) + (_pos_sp(0) - _pos(0)) * MPC_X_ADAPTIVE_I.get() * dt;
-		vel_sp_position(0) = vel_sp_position(0) + _pos_int(0);
-	}
-	else
-	{
-		vel_sp_position = (_pos_sp - _pos).emult(Vector3f(_param_mpc_xy_p.get(), _param_mpc_xy_p.get(),
-				    _param_mpc_z_p.get()));
-		_vel_sp = vel_sp_position + _vel_sp;
-	}
+	// Proportional
+	vel_sp_position = (_pos_sp - _pos).emult(Vector3f(gain_xp, MPC_Y_P.get(), _param_mpc_z_p.get()));
+
+	// Integral
+	_pos_int(0) = _pos_int(0) + (_pos_sp(0) - _pos(0)) * gain_xi * dt;
+	vel_sp_position(0) = vel_sp_position(0) + _pos_int(0);
+	_pos_int(1) = _pos_int(1) + (_pos_sp(1) - _pos(1)) * MPC_Y_I.get() * dt;
+	vel_sp_position(1) = vel_sp_position(1) + _pos_int(1);
+
+	_vel_sp = vel_sp_position + _vel_sp;
 
 	// Constrain horizontal velocity by prioritizing the velocity component along the
 	// the desired position setpoint over the feed-forward term.
@@ -350,14 +355,14 @@ void PositionControl::_velocityController(const float &dt)
 		Vector2f thrust_desired_NE;
 		if(MPC_X_ADAPTIVE.get() > 0)
 		{
-			thrust_desired_NE(0) = _adaptiveDirectMRACNormalized(dt, _vel_sp(0), _vel(0), false);
+			thrust_desired_NE(0) = _adaptiveDirectMRACNormalized(dt, _vel_sp(0), _vel(0));
 		}
 		else
 		{
-			thrust_desired_NE(0) = _param_mpc_xy_vel_p.get() * vel_err(0) + _param_mpc_xy_vel_d.get() * _vel_dot(0) + _thr_int(0);
-			_adaptiveDirectMRACNormalized(dt, _vel_sp(0), _vel(0), true); // Initialize variables of adaptive controller
+			thrust_desired_NE(0) = _param_mpc_x_vel_p.get() * vel_err(0) + _param_mpc_x_vel_d.get() * _vel_dot(0) + _thr_int(0);
+			_adaptiveDirectMRACNormalized(dt, _vel_sp(0), _vel(0)); // Initialize variables of adaptive controller
 		}
-		thrust_desired_NE(1) = _param_mpc_xy_vel_p.get() * vel_err(1) + _param_mpc_xy_vel_d.get() * _vel_dot(1) + _thr_int(1);
+		thrust_desired_NE(1) = _param_mpc_y_vel_p.get() * vel_err(1) + _param_mpc_y_vel_d.get() * _vel_dot(1) + _thr_int(1);
 
 		// Get maximum allowed thrust in NE based on tilt and excess thrust.
 		float thrust_max_NE_tilt = fabsf(_thr_sp(2)) * tanf(_constraints.tilt);
@@ -376,19 +381,20 @@ void PositionControl::_velocityController(const float &dt)
 
 		// Use tracking Anti-Windup for NE-direction: during saturation, the integrator is used to unsaturate the output
 		// see Anti-Reset Windup for PID controllers, L.Rundqwist, 1990
-		float arw_gain = 2.f / _param_mpc_xy_vel_p.get();
+		float arw_gain_x = 2.f / _param_mpc_x_vel_p.get();
+		float arw_gain_y = 2.f / _param_mpc_y_vel_p.get();
 
 		Vector2f vel_err_lim;
-		vel_err_lim(0) = vel_err(0) - (thrust_desired_NE(0) - _thr_sp(0)) * arw_gain;
-		vel_err_lim(1) = vel_err(1) - (thrust_desired_NE(1) - _thr_sp(1)) * arw_gain;
+		vel_err_lim(0) = vel_err(0) - (thrust_desired_NE(0) - _thr_sp(0)) * arw_gain_x;
+		vel_err_lim(1) = vel_err(1) - (thrust_desired_NE(1) - _thr_sp(1)) * arw_gain_y;
 
 		// Update integral
-		_thr_int(0) += _param_mpc_xy_vel_i.get() * vel_err_lim(0) * dt;
-		_thr_int(1) += _param_mpc_xy_vel_i.get() * vel_err_lim(1) * dt;
+		_thr_int(0) += _param_mpc_x_vel_i.get() * vel_err_lim(0) * dt;
+		_thr_int(1) += _param_mpc_y_vel_i.get() * vel_err_lim(1) * dt;
 	}
 }
 
-float PositionControl::_adaptiveDirectMRACNormalized(float T, float r, float yp, bool dryrun)
+float PositionControl::_adaptiveDirectMRACNormalized(float T, float r, float yp)
 {
 	// Parameters
 	float w = MRAC_WN.get();
@@ -427,15 +433,7 @@ float PositionControl::_adaptiveDirectMRACNormalized(float T, float r, float yp,
 	ym = (-(2*w*w*T*T-8)*ym1 - (4-4*z*w*T+w*w*T*T)*ym2 + (w*w/zm)*((2*T+zm*T*T)*r + (2*zm*T*T)*r1 + (zm*T*T-2*T)*r2))/(4+4*z*w*T+w*w*T*T);
 
 	// Error
-	if(!dryrun)
-	{
-    		e1 = yp - ym;
-	}
-	else
-	{
-		e1 = 0;
-	}
-
+	e1 = yp - ym;
 
 	// States
 	w11 = (-(2*l*zm*T*T-8)*w11_1 - (4-2*T*(l+zm)+l*zm*T*T)*w11_2 + (2*T)*u_prev + (-2*T)*u_prev2)/(4+2*T*(l+zm)+l*zm*T*T);

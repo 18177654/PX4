@@ -52,36 +52,47 @@ param set MPC_VELD_LP 5.0
 param set MPC_XY_CRUISE 12.0
 param set MPC_XY_VEL_MAX 12.0
 
+# Adaptive
 param set MPC_X_ADAPTIVE 0
-param set MPC_X_ADAPTIVE_P 0.3
-param set MPC_X_ADAPTIVE_I 0.003
 
 param set MRAC_WN 1.2
 param set MRAC_ZETA 0.8
 param set MRAC_ZERO 5
 param set MRAC_SGN_K 1
 param set MRAC_LAMBDA 100
-param set MRAC_GAIN_W11 100
-param set MRAC_GAIN_W12 100
-param set MRAC_GAIN_W21 100
-param set MRAC_GAIN_W22 100
-param set MRAC_GAIN_YP 0.02
-param set MRAC_GAIN_R 0.02
-param set MRAC_GAIN_RHO 0.02
+param set MRAC_GAIN_W11 150
+param set MRAC_GAIN_W12 150
+param set MRAC_GAIN_W21 150
+param set MRAC_GAIN_W22 750
+param set MRAC_GAIN_YP 0.03
+param set MRAC_GAIN_R 0.06
+param set MRAC_GAIN_RHO 0.03
 param set MRAC_INIT_THE11 105
 param set MRAC_INIT_THE12 490.1934
 param set MRAC_INIT_THE21 377.0628
 param set MRAC_INIT_THE22 1821.7
 param set MRAC_INIT_THE3 -3.6538
 param set MRAC_INIT_C0 0.0103
-param set MRAC_ADAP_MARGIN 0.075
+param set MRAC_ADAP_MARGIN 0.025
 param set MRAC_LEAKAGE 0.001
 
-param set MPC_XY_P 0.73254
-param set MPC_XY_VEL_P 0.1615
-param set MPC_XY_VEL_I 0.0319
-param set MPC_XY_VEL_D 0.0106
+# PID X Adaptive
+param set MPC_ADAPTIVE_X_P 0.3
+param set MPC_ADAPTIVE_X_I 0.001
 
+# PID XY
+param set MPC_X_P 0.73254
+param set MPC_X_I 0.0
+param set MPC_Y_P 0.73254
+param set MPC_Y_I 0.0
+param set MPC_X_VEL_P 0.1615
+param set MPC_X_VEL_I 0.0319
+param set MPC_X_VEL_D 0.0106
+param set MPC_Y_VEL_P 0.1615
+param set MPC_Y_VEL_I 0.0319
+param set MPC_Y_VEL_D 0.0106
+
+# PID Z
 param set MPC_Z_P 1.0
 param set MPC_Z_VEL_P 0.1549
 param set MPC_Z_VEL_I 0.0279

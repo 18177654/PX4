@@ -39,6 +39,50 @@
  */
 
 /**
+ * Source voltage of the payload angle estimator circuit. Should be 5V.
+ *
+ * @min 0.0
+ * @max 12.0
+ * @decimal 2
+ * @increment 0.01
+ * @group Payload Angle
+ */
+PARAM_DEFINE_FLOAT(PAYLOAD_VS, 5.0f);
+
+/**
+ * Resistor of the payload angle estimator circuit.
+ *
+ * @min 0.0
+ * @max 100000.0
+ * @decimal 2
+ * @increment 0.01
+ * @group Payload Angle
+ */
+PARAM_DEFINE_FLOAT(PAYLOAD_R, 12.0f);
+
+/**
+ * Potentiometer of the payload angle estimator circuit.
+ *
+ * @min 0.0
+ * @max 100000.0
+ * @decimal 2
+ * @increment 0.01
+ * @group Payload Angle
+ */
+PARAM_DEFINE_FLOAT(PAYLOAD_POT, 20.0f);
+
+/**
+ * The maximum rotation of the payload angle (in degrees).
+ *
+ * @min 0.0
+ * @max 360.0
+ * @decimal 2
+ * @increment 0.01
+ * @group Payload Angle
+ */
+PARAM_DEFINE_FLOAT(PAYLOAD_RANGE, 270.0f);
+
+/**
  * Bias the payload angle for the estimator to measure 0 degrees when payload has no angle.
  *
  * @min -180.0

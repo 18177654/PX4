@@ -69,6 +69,10 @@ protected:
 
 	DEFINE_PARAMETERS(
 		(ParamFloat<px4::params::PAYLOAD_BIAS>) PAYLOAD_BIAS,
-		(ParamFloat<px4::params::PAYLOAD_CUTOFF>) PAYLOAD_CUTOFF
+		(ParamFloat<px4::params::PAYLOAD_CUTOFF>) PAYLOAD_CUTOFF,
+		(ParamFloat<px4::params::PAYLOAD_VS>) PAYLOAD_VS,
+		(ParamFloat<px4::params::PAYLOAD_R>) PAYLOAD_R,
+		(ParamFloat<px4::params::PAYLOAD_POT>) PAYLOAD_POT,
+		(ParamFloat<px4::params::PAYLOAD_RANGE>) PAYLOAD_RANGE
 	)
 };

@@ -56,6 +56,7 @@
 #include <uORB/topics/vehicle_status.h>
 #include <uORB/topics/vehicle_trajectory_waypoint.h>
 #include <uORB/topics/landing_gear.h>
+#include <uORB/topics/mrac.h>
 
 #include <float.h>
 #include <mathlib/mathlib.h>
@@ -111,6 +112,7 @@ private:
 	orb_advert_t _pub_vehicle_command{nullptr};           /**< vehicle command publication */
 	orb_id_t _attitude_setpoint_id{nullptr};
 	orb_advert_t	_landing_gear_pub{nullptr};
+	orb_advert_t	_mrac_pub{nullptr};
 
 	int		_vehicle_status_sub{-1};		/**< vehicle status subscription */
 	int		_vehicle_land_detected_sub{-1};	/**< vehicle land detected subscription */
@@ -221,6 +223,12 @@ private:
 	 * This is only required for logging.
 	 */
 	void publish_local_pos_sp(const vehicle_local_position_setpoint_s &local_pos_sp);
+
+	/**
+	 * Publish MRAC message.
+	 * This is only required for logging.
+	 */
+	void publish_mrac(const struct mrac_s &mrac_msg);
 
 	/**
 	 * Publish local position setpoint.
@@ -704,6 +712,20 @@ MulticopterPositionControl::run()
 			// vehicle intention.
 			publish_local_pos_sp(local_pos_sp);
 
+			// Publish MRAC message for logging.
+			struct mrac_s mrac_msg = {};
+			mrac_msg.timestamp = hrt_absolute_time();
+			mrac_msg.the11 = _control.getMracThe11();
+			mrac_msg.the12 = _control.getMracThe12();
+			mrac_msg.the21 = _control.getMracThe21();
+			mrac_msg.the22 = _control.getMracThe22();
+			mrac_msg.the3 = _control.getMracThe3();
+			mrac_msg.c0 = _control.getMracC0();
+			mrac_msg.rho = _control.getMracRho();
+			mrac_msg.u = _control.getMracU();
+			mrac_msg.ym = _control.getMracYm();
+			publish_mrac(mrac_msg);
+
 			// Inform FlightTask about the input and output of the velocity controller
 			// This is used to properly initialize the velocity setpoint when onpening the position loop (position unlock)
 			_flight_tasks.updateVelocityControllerIO(_control.getVelSp(), local_pos_sp.thrust);
@@ -1047,6 +1069,18 @@ MulticopterPositionControl::publish_local_pos_sp(const vehicle_local_position_se
 
 	} else {
 		_local_pos_sp_pub = orb_advertise(ORB_ID(vehicle_local_position_setpoint), &local_pos_sp);
+	}
+}
+
+void
+MulticopterPositionControl::publish_mrac(const struct mrac_s &mrac_msg)
+{
+	// publish mrac
+	if (_mrac_pub != nullptr) {
+		orb_publish(ORB_ID(mrac), _mrac_pub, &mrac_msg);
+
+	} else {
+		_mrac_pub = orb_advertise(ORB_ID(mrac), &mrac_msg);
 	}
 }
 

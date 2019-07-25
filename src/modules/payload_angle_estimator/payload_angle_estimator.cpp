@@ -37,6 +37,7 @@
 #include <px4_getopt.h>
 #include <px4_log.h>
 #include <px4_posix.h>
+#include <matrix/matrix/math.hpp>
 
 #include <uORB/topics/parameter_update.h>
 #include <uORB/topics/adc_report.h>
@@ -143,15 +144,16 @@ void PayloadAngleEstimator::run()
 	}
 
 	// Constants
-	float v_out_max = 2.8206f;
-	float r2_max = 12.0f*v_out_max/(5.0f - v_out_max);
-	float range_max = 270.0f;
+	float r2_max = PAYLOAD_POT.get();
+	float r1 = PAYLOAD_R.get();
+	float vs = PAYLOAD_VS.get();
+	float range_max = PAYLOAD_RANGE.get() * (float)M_PI/180.0f;
 
 	uint8_t channel = 3;
 
 	// Variables.
 	hrt_abstime last_time = hrt_absolute_time();
-	float adc_voltage;
+	float payload_angle;
 	bool dry_run = true;
 
 	while (!should_exit()) {
@@ -174,26 +176,32 @@ void PayloadAngleEstimator::run()
 			struct adc_report_s adc_report;
 			orb_copy(ORB_ID(adc_report), adc_report_sub, &adc_report);
 
-			// Lowpass filter the measurement
+			// Lowpass filter parameters
 			hrt_abstime current_time = hrt_absolute_time();
 
-			float RC = 1.0f/(PAYLOAD_CUTOFF.get()*2.0f*3.14f);
+			float RC = 1.0f/(PAYLOAD_CUTOFF.get()*2.0f*(float)M_PI);
 			float dt = (current_time - last_time)*1.0e-6f;
 			float alpha = dt/(RC+dt);
 
-			// Get initial ADC value for LPF
+			// Calculate payload angle
+			payload_angle_report.payload_angle = -((range_max/2.0f)/(r2_max/2.0f))*((adc_report.channel_value[channel]/(vs - adc_report.channel_value[channel]))*r1 - r2_max/2.0f) + PAYLOAD_BIAS.get();
+
+			// Apply LPF. Get initial value for LPF during the first run and apply the filter from next run.
 			if(dry_run)
 			{
-				adc_voltage = adc_report.channel_value[channel];
+				payload_angle = payload_angle_report.payload_angle;
 				dry_run = false;
 			}
 			else
 			{
-				adc_voltage = adc_voltage + (alpha*(adc_report.channel_value[channel] - adc_voltage));
+				payload_angle = payload_angle + (alpha*(payload_angle_report.payload_angle - payload_angle));
 			}
+			payload_angle_report.payload_angle_filtered = payload_angle;
 
-			payload_angle_report.payload_angle = -((range_max/r2_max)*(12.0f*adc_report.channel_value[channel]/(5.0f-adc_report.channel_value[channel])) - range_max/2.0f) + PAYLOAD_BIAS.get();
-			payload_angle_report.payload_angle_filtered = -((range_max/r2_max)*(12.0f*adc_voltage/(5.0f-adc_voltage)) - range_max/2.0f) + PAYLOAD_BIAS.get();
+			// Save angle in degrees.
+			payload_angle_report.payload_angle_deg = payload_angle_report.payload_angle * 180.0f/((float)M_PI);
+			payload_angle_report.payload_angle_filtered_deg = payload_angle_report.payload_angle_filtered * 180.0f/((float)M_PI);
+
 			if(payload_angle_topic != nullptr)
 			{
 				payload_angle_report.timestamp = hrt_absolute_time();

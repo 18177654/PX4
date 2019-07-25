@@ -191,6 +191,52 @@ public:
 		return pos_sp;
 	}
 
+	// Adaptive parameter GET methods.
+	float getMracThe11()
+	{
+		return the11;
+	}
+
+	float getMracThe12()
+	{
+		return the12;
+	}
+
+	float getMracThe21()
+	{
+		return the21;
+	}
+
+	float getMracThe22()
+	{
+		return the22;
+	}
+
+	float getMracThe3()
+	{
+		return the3;
+	}
+
+	float getMracC0()
+	{
+		return c0;
+	}
+
+	float getMracRho()
+	{
+		return rho;
+	}
+
+	float getMracU()
+	{
+		return u_prev;
+	}
+
+	float getMracYm()
+	{
+		return ym1;
+	}
+
 protected:
 
 	void updateParams() override;
@@ -204,7 +250,7 @@ private:
 
 	void _positionController(const float &dt); /** applies the P-position-controller */
 	void _velocityController(const float &dt); /** applies the PID-velocity-controller */
-	float _adaptiveDirectMRACNormalized(float T, float r, float yp, bool dryrun); /** applies adaptive normalized direct MRAC for swinging payload */
+	float _adaptiveDirectMRACNormalized(float T, float r, float yp); /** applies adaptive normalized direct MRAC for swinging payload */
 	void _setCtrlFlag(bool value); /**< set control-loop flags (only required for logging) */
 
 	matrix::Vector3f _pos{}; /**< MC position */
@@ -256,8 +302,12 @@ private:
 		(ParamFloat<px4::params::MPC_Z_VEL_D>) _param_mpc_z_vel_d,
 		(ParamFloat<px4::params::MPC_XY_P>) _param_mpc_xy_p,
 		(ParamInt<px4::params::MPC_X_ADAPTIVE>) MPC_X_ADAPTIVE,
-		(ParamFloat<px4::params::MPC_X_ADAPTIVE_P>) MPC_X_ADAPTIVE_P,
-		(ParamFloat<px4::params::MPC_X_ADAPTIVE_I>) MPC_X_ADAPTIVE_I,
+		(ParamFloat<px4::params::MPC_ADAPTIVE_X_P>) MPC_ADAPTIVE_X_P,
+		(ParamFloat<px4::params::MPC_ADAPTIVE_X_I>) MPC_ADAPTIVE_X_I,
+		(ParamFloat<px4::params::MPC_X_P>) MPC_X_P,
+		(ParamFloat<px4::params::MPC_X_I>) MPC_X_I,
+		(ParamFloat<px4::params::MPC_Y_P>) MPC_Y_P,
+		(ParamFloat<px4::params::MPC_Y_I>) MPC_Y_I,
 		(ParamFloat<px4::params::MRAC_WN>) MRAC_WN,
 		(ParamFloat<px4::params::MRAC_ZETA>) MRAC_ZETA,
 		(ParamFloat<px4::params::MRAC_ZERO>) MRAC_ZERO,
@@ -278,8 +328,11 @@ private:
 		(ParamFloat<px4::params::MRAC_INIT_C0>) MRAC_INIT_C0,
 		(ParamFloat<px4::params::MRAC_ADAP_MARGIN>) MRAC_ADAP_MARGIN,
 		(ParamFloat<px4::params::MRAC_LEAKAGE>) MRAC_LEAKAGE,
-		(ParamFloat<px4::params::MPC_XY_VEL_P>) _param_mpc_xy_vel_p,
-		(ParamFloat<px4::params::MPC_XY_VEL_I>) _param_mpc_xy_vel_i,
-		(ParamFloat<px4::params::MPC_XY_VEL_D>) _param_mpc_xy_vel_d
+		(ParamFloat<px4::params::MPC_X_VEL_P>) _param_mpc_x_vel_p,
+		(ParamFloat<px4::params::MPC_X_VEL_I>) _param_mpc_x_vel_i,
+		(ParamFloat<px4::params::MPC_X_VEL_D>) _param_mpc_x_vel_d,
+		(ParamFloat<px4::params::MPC_Y_VEL_P>) _param_mpc_y_vel_p,
+		(ParamFloat<px4::params::MPC_Y_VEL_I>) _param_mpc_y_vel_i,
+		(ParamFloat<px4::params::MPC_Y_VEL_D>) _param_mpc_y_vel_d
 	)
 };

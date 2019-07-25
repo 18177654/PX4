@@ -201,24 +201,64 @@ PARAM_DEFINE_FLOAT(MPC_Z_VEL_MAX_DN, 1.0f);
 PARAM_DEFINE_INT32(MPC_X_ADAPTIVE, 0);
 
 /**
- * Proportional gain for horizontal position error with adaptive velocity controller
+ * Proportional gain for the adaptive horizontal X position error
  *
  * @min 0.0
  * @max 2.0
- * @decimal 2
+ * @decimal 5
  * @group Multicopter Position Control
  */
-PARAM_DEFINE_FLOAT(MPC_X_ADAPTIVE_P, 0.3f);
+PARAM_DEFINE_FLOAT(MPC_ADAPTIVE_X_P, 0.366f);
 
 /**
- * Integral gain for horizontal position error with adaptive velocity controller
+ * Integral gain for adaptive horizontal X position error
  *
  * @min 0.0
  * @max 2.0
- * @decimal 2
+ * @decimal 5
  * @group Multicopter Position Control
  */
-PARAM_DEFINE_FLOAT(MPC_X_ADAPTIVE_I, 0.003f);
+PARAM_DEFINE_FLOAT(MPC_ADAPTIVE_X_I, 0.0052f);
+
+/**
+ * Proportional gain for horizontal X position error
+ *
+ * @min 0.0
+ * @max 2.0
+ * @decimal 5
+ * @group Multicopter Position Control
+ */
+PARAM_DEFINE_FLOAT(MPC_X_P, 0.73254f);
+
+/**
+ * Integral gain for horizontal X position error
+ *
+ * @min 0.0
+ * @max 2.0
+ * @decimal 5
+ * @group Multicopter Position Control
+ */
+PARAM_DEFINE_FLOAT(MPC_X_I, 0.0f);
+
+/**
+ * Proportional gain for horizontal Y position error
+ *
+ * @min 0.0
+ * @max 2.0
+ * @decimal 5
+ * @group Multicopter Position Control
+ */
+PARAM_DEFINE_FLOAT(MPC_Y_P, 0.73254f);
+
+/**
+ * Integral gain for horizontal Y position error
+ *
+ * @min 0.0
+ * @max 2.0
+ * @decimal 5
+ * @group Multicopter Position Control
+ */
+PARAM_DEFINE_FLOAT(MPC_Y_I, 0.0f);
 
 /**
  * Natural frequency of reference model for MRAC
@@ -389,6 +429,70 @@ PARAM_DEFINE_FLOAT(MRAC_LEAKAGE, 0.001f);
  * @group Multicopter Position Control
  */
 PARAM_DEFINE_FLOAT(MPC_XY_P, 0.95f);
+
+/**
+ * Proportional gain for horizontal X velocity error
+ *
+ * @min 0.06
+ * @max 0.15
+ * @decimal 2
+ * @group Multicopter Position Control
+ */
+PARAM_DEFINE_FLOAT(MPC_X_VEL_P, 0.09f);
+
+/**
+ * Integral gain for horizontal X velocity error
+ *
+ * Non-zero value allows to eliminate steady state errors in the presence of disturbances like wind.
+ *
+ * @min 0.0
+ * @max 3.0
+ * @decimal 3
+ * @group Multicopter Position Control
+ */
+PARAM_DEFINE_FLOAT(MPC_X_VEL_I, 0.02f);
+
+/**
+ * Differential gain for horizontal X velocity error. Small values help reduce fast oscillations. If value is too big oscillations will appear again.
+ *
+ * @min 0.005
+ * @max 0.1
+ * @decimal 3
+ * @group Multicopter Position Control
+ */
+PARAM_DEFINE_FLOAT(MPC_X_VEL_D, 0.01f);
+
+/**
+ * Proportional gain for horizontal Y velocity error
+ *
+ * @min 0.06
+ * @max 0.15
+ * @decimal 2
+ * @group Multicopter Position Control
+ */
+PARAM_DEFINE_FLOAT(MPC_Y_VEL_P, 0.09f);
+
+/**
+ * Integral gain for horizontal Y velocity error
+ *
+ * Non-zero value allows to eliminate steady state errors in the presence of disturbances like wind.
+ *
+ * @min 0.0
+ * @max 3.0
+ * @decimal 3
+ * @group Multicopter Position Control
+ */
+PARAM_DEFINE_FLOAT(MPC_Y_VEL_I, 0.02f);
+
+/**
+ * Differential gain for horizontal Y velocity error. Small values help reduce fast oscillations. If value is too big oscillations will appear again.
+ *
+ * @min 0.005
+ * @max 0.1
+ * @decimal 3
+ * @group Multicopter Position Control
+ */
+PARAM_DEFINE_FLOAT(MPC_Y_VEL_D, 0.01f);
 
 /**
  * Proportional gain for horizontal velocity error
