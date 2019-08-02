@@ -442,6 +442,7 @@ int MCP3428::collect() {
     // Publish it
     if (_motor_current_topic != nullptr) {
         report.timestamp = hrt_absolute_time();
+        report.total_motor_current = report.motor_currents[0] + report.motor_currents[1] + report.motor_currents[2] + report.motor_currents[3];
         orb_publish(ORB_ID(motor_current), _motor_current_topic, &report);
     }
 

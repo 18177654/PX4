@@ -12,6 +12,4 @@
 #
 
 sh /etc/init.d/airframes/4960_griffin
-
-set PWM_OUT 1234
 param set SYS_HITL 1

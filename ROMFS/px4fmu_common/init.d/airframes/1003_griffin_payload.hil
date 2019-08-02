@@ -1,6 +1,6 @@
 #!nsh
 #
-# @name Griffin HIL
+# @name Griffin with Payload HIL
 #
 # @type Simulation
 # @class Copter
@@ -11,7 +11,5 @@
 # @output MAIN4 motor 4
 #
 
-sh /etc/init.d/airframes/4960_griffin
-
-set PWM_OUT 1234
+sh /etc/init.d/airframes/4961_griffin_payload
 param set SYS_HITL 1

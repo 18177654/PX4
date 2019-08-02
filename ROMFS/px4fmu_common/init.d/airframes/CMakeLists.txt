@@ -89,7 +89,7 @@ px4_add_romfs_files(
 	4250_teal
 	4900_crazyflie
 	4960_griffin
-	4960_griffin_payload
+	4961_griffin_payload
 	4220_honeybee
 
 	# [5000, 5999] Quadrotor +"
