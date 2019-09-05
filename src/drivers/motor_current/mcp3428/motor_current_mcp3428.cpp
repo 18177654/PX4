@@ -60,6 +60,8 @@
 #include <math.h>
 #include <unistd.h>
 
+#include <parameters/param.h>
+
 #include <perf/perf_counter.h>
 #include <systemlib/err.h>
 
@@ -80,11 +82,6 @@
 #define MCP_CMD_RESET 0x06
 #define MCP_REQ_READING 0x84
 
-#define MCP_CALIBRATE 8.55
-#define MCP_LSB 0.00025
-
-#define ACS_V_PER_A 0.060
-
 #ifndef CONFIG_SCHED_WORKQUEUE
 # error This requires CONFIG_SCHED_WORKQUEUE.
 #endif
@@ -92,18 +89,18 @@
 // MCP3428 class
 class MCP3428 : public device::I2C {
 public:
-    MCP3428(int bus = MCP3428_BUS, int address = MCP3428_BASEADDR);
-    virtual ~MCP3428();
+	MCP3428(int bus = MCP3428_BUS, int address = MCP3428_BASEADDR);
+	virtual ~MCP3428();
 
-    virtual int init();
+	virtual int init();
 
-    virtual ssize_t read(device::file_t *filp, char *buffer, size_t buflen);
-    virtual int ioctl(device::file_t *filp, int cmd, unsigned long arg);
+	virtual ssize_t read(device::file_t *filp, char *buffer, size_t buflen);
+	virtual int ioctl(device::file_t *filp, int cmd, unsigned long arg);
 
-    /**
-    * Diagnostics - print some basic information about the driver.
-    */
-    void print_info();
+	/**
+	* Diagnostics - print some basic information about the driver.
+	*/
+	void print_info();
 
 protected:
     virtual int probe();
@@ -120,7 +117,15 @@ private:
     int _class_instance;
     int _orb_class_instance;
 
+	// Parameters
+	float acs_v_per_a;
+	float mcp_lsb;
+	float mcp_bias;
+	float mot_curr_cutoff;
+
     uint8_t _current_motor; // represents the current motor current begin read
+
+    hrt_abstime last_time[4]; // represents the current motor current begin read
 
     struct motor_current_s report;
 
@@ -225,6 +230,40 @@ int MCP3428::init()
 {
     uint8_t cmd;
     int ret = PX4_ERROR;
+
+    // Initialize last times
+    for(uint8_t i = 0 ; i < 4 ; i++) {
+	    last_time[i] = 0;
+    }
+
+	// Fetch parameters
+	param_t handle = param_find("MOT_ACS_V_PER_A");
+	acs_v_per_a = 0.0f;
+
+	if (handle != PARAM_INVALID) {
+		param_get(handle, &acs_v_per_a);
+	}
+
+	handle = param_find("MOT_MCP_LSB");
+	mcp_lsb = 0.0f;
+
+	if (handle != PARAM_INVALID) {
+		param_get(handle, &mcp_lsb);
+	}
+
+	handle = param_find("MOT_MCP_BIAS");
+	mcp_bias = 0.0f;
+
+	if (handle != PARAM_INVALID) {
+		param_get(handle, &mcp_bias);
+	}
+
+	handle = param_find("MOT_CURR_CUTOFF");
+	mot_curr_cutoff = 0.0f;
+
+	if (handle != PARAM_INVALID) {
+		param_get(handle, &mot_curr_cutoff);
+	}
 
     // Do I2C init (and probe) first
     set_device_address(MCP3428_BASEADDR);
@@ -427,10 +466,27 @@ int MCP3428::collect() {
     // Only store the reading and move on to the next motor if the reading is valid.
     if(isValid) {
         // Convert reading to motor current Amps
-        current = ((float(current_reading) * float(MCP_LSB)) / float(ACS_V_PER_A)) - float(MCP_CALIBRATE);
+        current = ((float(current_reading) * float(mcp_lsb)) / float(acs_v_per_a)) + float(mcp_bias);
 
         // Store reading
         report.motor_currents[channel_to_motor(_current_motor)] = current;
+
+		// Filter reading
+		hrt_abstime current_time = hrt_absolute_time();
+
+		float RC = 1.0f/(mot_curr_cutoff*2.0f*(float)M_PI);
+		float dt = (current_time - last_time[channel_to_motor(_current_motor)])*1.0e-6f;
+		float alpha = dt/(RC+dt);
+		float current_filt = 0;
+
+		if(last_time[channel_to_motor(_current_motor)] == 0) {
+			current_filt = current;
+		} else {
+			current_filt = report.motor_currents_filt[channel_to_motor(_current_motor)] + (alpha*(current - report.motor_currents_filt[channel_to_motor(_current_motor)]));
+		}
+
+		report.motor_currents_filt[channel_to_motor(_current_motor)] = current_filt;
+		last_time[channel_to_motor(_current_motor)] = current_time;
 
         // Read next motor on next execution
         _current_motor++;
@@ -443,6 +499,7 @@ int MCP3428::collect() {
     if (_motor_current_topic != nullptr) {
         report.timestamp = hrt_absolute_time();
         report.total_motor_current = report.motor_currents[0] + report.motor_currents[1] + report.motor_currents[2] + report.motor_currents[3];
+		report.total_motor_current_filt = report.motor_currents_filt[0] + report.motor_currents_filt[1] + report.motor_currents_filt[2] + report.motor_currents_filt[3];
         orb_publish(ORB_ID(motor_current), _motor_current_topic, &report);
     }
 
