@@ -198,7 +198,7 @@ PARAM_DEFINE_FLOAT(MPC_Z_VEL_MAX_DN, 1.0f);
  * @max 1
  * @group Multicopter Position Control
  */
-PARAM_DEFINE_INT32(MPC_X_ADAPTIVE, 0);
+PARAM_DEFINE_INT32(MPC_X_ADAP_EN, 0);
 
 /**
  * Proportional gain for the adaptive horizontal X position error
@@ -208,17 +208,7 @@ PARAM_DEFINE_INT32(MPC_X_ADAPTIVE, 0);
  * @decimal 5
  * @group Multicopter Position Control
  */
-PARAM_DEFINE_FLOAT(MPC_ADAPTIVE_X_P, 0.366f);
-
-/**
- * Integral gain for adaptive horizontal X position error
- *
- * @min 0.0
- * @max 2.0
- * @decimal 5
- * @group Multicopter Position Control
- */
-PARAM_DEFINE_FLOAT(MPC_ADAPTIVE_X_I, 0.0052f);
+PARAM_DEFINE_FLOAT(MPC_ADAP_X_P, 0.366f);
 
 /**
  * Proportional gain for horizontal X position error
@@ -231,16 +221,6 @@ PARAM_DEFINE_FLOAT(MPC_ADAPTIVE_X_I, 0.0052f);
 PARAM_DEFINE_FLOAT(MPC_X_P, 0.73254f);
 
 /**
- * Integral gain for horizontal X position error
- *
- * @min 0.0
- * @max 2.0
- * @decimal 5
- * @group Multicopter Position Control
- */
-PARAM_DEFINE_FLOAT(MPC_X_I, 0.0f);
-
-/**
  * Proportional gain for horizontal Y position error
  *
  * @min 0.0
@@ -251,38 +231,12 @@ PARAM_DEFINE_FLOAT(MPC_X_I, 0.0f);
 PARAM_DEFINE_FLOAT(MPC_Y_P, 0.73254f);
 
 /**
- * Integral gain for horizontal Y position error
- *
- * @min 0.0
- * @max 2.0
- * @decimal 5
- * @group Multicopter Position Control
- */
-PARAM_DEFINE_FLOAT(MPC_Y_I, 0.0f);
-
-/**
  * Natural frequency of reference model for MRAC
  *
  * @decimal 2
  * @group Multicopter Position Control
  */
-PARAM_DEFINE_FLOAT(MRAC_WN, 1.2f);
-
-/**
- * Damping factor of reference model for MRAC
- *
- * @decimal 2
- * @group Multicopter Position Control
- */
-PARAM_DEFINE_FLOAT(MRAC_ZETA, 0.8f);
-
-/**
- * Zero of reference model for MRAC
- *
- * @decimal 2
- * @group Multicopter Position Control
- */
-PARAM_DEFINE_FLOAT(MRAC_ZERO, 5.0f);
+PARAM_DEFINE_FLOAT(MPC_MRAC_WN, 0.8f);
 
 /**
  * Sign of k for MRAC
@@ -290,15 +244,31 @@ PARAM_DEFINE_FLOAT(MRAC_ZERO, 5.0f);
  * @decimal 2
  * @group Multicopter Position Control
  */
-PARAM_DEFINE_INT32(MRAC_SGN_K, 1);
+PARAM_DEFINE_INT32(MPC_MRAC_SGN_K, 1);
 
 /**
- * Lambda of reference model for MRAC
+ * Lambda bandwidth of reference model for MRAC
  *
  * @decimal 2
  * @group Multicopter Position Control
  */
-PARAM_DEFINE_FLOAT(MRAC_LAMBDA, 100.0f);
+PARAM_DEFINE_FLOAT(MPC_MRAC_LMBDWN, 50.0f);
+
+/**
+ * Lambda damping factor of reference model for MRAC
+ *
+ * @decimal 2
+ * @group Multicopter Position Control
+ */
+PARAM_DEFINE_FLOAT(MPC_MRAC_LMBDZT, 0.9f);
+
+/**
+ * Normalizing factor for control signal
+ *
+ * @decimal 2
+ * @group Multicopter Position Control
+ */
+PARAM_DEFINE_FLOAT(MPC_MRAC_UP_NORM, 125.5680f);
 
 /**
  * Adaptive gain of parameter w11 for MRAC
@@ -306,7 +276,7 @@ PARAM_DEFINE_FLOAT(MRAC_LAMBDA, 100.0f);
  * @decimal 4
  * @group Multicopter Position Control
  */
-PARAM_DEFINE_FLOAT(MRAC_GAIN_W11, 100.0f);
+PARAM_DEFINE_FLOAT(MPC_MRAC_GAINW11, 0.0f);
 
 /**
  * Adaptive gain of parameter w12 for MRAC
@@ -314,7 +284,7 @@ PARAM_DEFINE_FLOAT(MRAC_GAIN_W11, 100.0f);
  * @decimal 4
  * @group Multicopter Position Control
  */
-PARAM_DEFINE_FLOAT(MRAC_GAIN_W12, 100.0f);
+PARAM_DEFINE_FLOAT(MPC_MRAC_GAINW12, 0.0f);
 
 /**
  * Adaptive gain of parameter w21 for MRAC
@@ -322,7 +292,7 @@ PARAM_DEFINE_FLOAT(MRAC_GAIN_W12, 100.0f);
  * @decimal 4
  * @group Multicopter Position Control
  */
-PARAM_DEFINE_FLOAT(MRAC_GAIN_W21, 100.0f);
+PARAM_DEFINE_FLOAT(MPC_MRAC_GAINW21, 0.0f);
 
 /**
  * Adaptive gain of parameter w22 for MRAC
@@ -330,7 +300,7 @@ PARAM_DEFINE_FLOAT(MRAC_GAIN_W21, 100.0f);
  * @decimal 4
  * @group Multicopter Position Control
  */
-PARAM_DEFINE_FLOAT(MRAC_GAIN_W22, 100.0f);
+PARAM_DEFINE_FLOAT(MPC_MRAC_GAINW22, 0.0f);
 
 /**
  * Adaptive gain of parameter yp for MRAC
@@ -338,7 +308,7 @@ PARAM_DEFINE_FLOAT(MRAC_GAIN_W22, 100.0f);
  * @decimal 4
  * @group Multicopter Position Control
  */
-PARAM_DEFINE_FLOAT(MRAC_GAIN_YP, 0.02f);
+PARAM_DEFINE_FLOAT(MPC_MRAC_GAINYP, 10000.0f);
 
 /**
  * Adaptive gain of parameter r for MRAC
@@ -346,7 +316,7 @@ PARAM_DEFINE_FLOAT(MRAC_GAIN_YP, 0.02f);
  * @decimal 4
  * @group Multicopter Position Control
  */
-PARAM_DEFINE_FLOAT(MRAC_GAIN_R, 0.02f);
+PARAM_DEFINE_FLOAT(MPC_MRAC_GAINR, 1250.0f);
 
 /**
  * Adaptive gain of parameter rho for MRAC
@@ -354,7 +324,7 @@ PARAM_DEFINE_FLOAT(MRAC_GAIN_R, 0.02f);
  * @decimal 4
  * @group Multicopter Position Control
  */
-PARAM_DEFINE_FLOAT(MRAC_GAIN_RHO, 0.02f);
+PARAM_DEFINE_FLOAT(MPC_MRAC_GAINRO, 2.0f);
 
 /**
  * Initial condition for adaptive parameter theta11 for MRAC
@@ -362,7 +332,7 @@ PARAM_DEFINE_FLOAT(MRAC_GAIN_RHO, 0.02f);
  * @decimal 6
  * @group Multicopter Position Control
  */
-PARAM_DEFINE_FLOAT(MRAC_INIT_THE11, 105.0f);
+PARAM_DEFINE_FLOAT(MPC_MRACI_THE11, 90.0f);
 
 /**
  * Initial condition for adaptive parameter theta12 for MRAC
@@ -370,7 +340,7 @@ PARAM_DEFINE_FLOAT(MRAC_INIT_THE11, 105.0f);
  * @decimal 6
  * @group Multicopter Position Control
  */
-PARAM_DEFINE_FLOAT(MRAC_INIT_THE12, 490.1934f);
+PARAM_DEFINE_FLOAT(MPC_MRACI_THE12, 2499.0f);
 
 /**
  * Initial condition for adaptive parameter theta21 for MRAC
@@ -378,7 +348,7 @@ PARAM_DEFINE_FLOAT(MRAC_INIT_THE12, 490.1934f);
  * @decimal 6
  * @group Multicopter Position Control
  */
-PARAM_DEFINE_FLOAT(MRAC_INIT_THE21, 377.0628f);
+PARAM_DEFINE_FLOAT(MPC_MRACI_THE21, 25204.0f);
 
 /**
  * Initial condition for adaptive parameter theta22 for MRAC
@@ -386,7 +356,7 @@ PARAM_DEFINE_FLOAT(MRAC_INIT_THE21, 377.0628f);
  * @decimal 6
  * @group Multicopter Position Control
  */
-PARAM_DEFINE_FLOAT(MRAC_INIT_THE22, 1821.7f);
+PARAM_DEFINE_FLOAT(MPC_MRACI_THE22, 1012500.0f);
 
 /**
  * Initial condition for adaptive parameter theta3 for MRAC
@@ -394,7 +364,7 @@ PARAM_DEFINE_FLOAT(MRAC_INIT_THE22, 1821.7f);
  * @decimal 6
  * @group Multicopter Position Control
  */
-PARAM_DEFINE_FLOAT(MRAC_INIT_THE3, -3.6538f);
+PARAM_DEFINE_FLOAT(MPC_MRACI_THE3, -408.6f);
 
 /**
  * Initial condition for adaptive parameter c0 for MRAC
@@ -402,23 +372,7 @@ PARAM_DEFINE_FLOAT(MRAC_INIT_THE3, -3.6538f);
  * @decimal 6
  * @group Multicopter Position Control
  */
-PARAM_DEFINE_FLOAT(MRAC_INIT_C0, 0.0103f);
-
-/**
- * The deadzone width for the adaption law
- *
- * @decimal 6
- * @group Multicopter Position Control
- */
-PARAM_DEFINE_FLOAT(MRAC_ADAP_MARGIN, 0.0f);
-
-/**
- * The leakage constant gain parameter
- *
- * @decimal 6
- * @group Multicopter Position Control
- */
-PARAM_DEFINE_FLOAT(MRAC_LEAKAGE, 0.001f);
+PARAM_DEFINE_FLOAT(MPC_MRACI_C0, 3.6f);
 
 /**
  * Proportional gain for horizontal position error

@@ -47,7 +47,7 @@
  * @increment 0.0001
  * @group Motor Currents
  */
-PARAM_DEFINE_FLOAT(MOT_ACS_V_PER_A, 0.060f);
+PARAM_DEFINE_FLOAT(MOT_ACS_V_PER_A, 0.0266f);
 
 /**
  * The resolution of a bit.
@@ -80,4 +80,4 @@ PARAM_DEFINE_FLOAT(MOT_MCP_BIAS, -8.55f);
  * @increment 0.01
  * @group Motor Currents
  */
-PARAM_DEFINE_FLOAT(MOT_CURR_CUTOFF, 50.0f);
+PARAM_DEFINE_FLOAT(MOT_CURR_CUTOFF, 0.5f);

@@ -18,9 +18,9 @@ param set IMU_ACCEL_CUTOFF 30.0
 param set MC_DTERM_CUTOFF 0.0
 
 param set MC_ROLL_P 3
-param set MC_ROLLRATE_P 0.086
-param set MC_ROLLRATE_I 0.020
-param set MC_ROLLRATE_D 0.003
+param set MC_ROLLRATE_P 0.0842
+param set MC_ROLLRATE_I 0.0196
+param set MC_ROLLRATE_D 0.0029
 param set MC_ROLLRATE_FF 0.0
 param set MC_ROLLRATE_MAX 120.0
 param set MC_ACRO_R_MAX 120.0
@@ -47,16 +47,14 @@ param set MPC_MAN_TILT_MAX 30.0
 
 param set MPC_VELD_LP 5.0
 
-param set MPC_X_P 0.5
-param set MPC_X_I 0.0
-param set MPC_Y_P 0.5
-param set MPC_Y_I 0.0
-param set MPC_X_VEL_P 0.052
+param set MPC_X_P 0.4
+param set MPC_Y_P 0.4
+param set MPC_X_VEL_P 0.048
 param set MPC_X_VEL_I 0.008
-param set MPC_X_VEL_D 0.001
-param set MPC_Y_VEL_P 0.052
+param set MPC_X_VEL_D 0.002
+param set MPC_Y_VEL_P 0.048
 param set MPC_Y_VEL_I 0.008
-param set MPC_Y_VEL_D 0.001
+param set MPC_Y_VEL_D 0.002
 
 param set MPC_Z_P 0.9
 param set MPC_Z_VEL_P 0.1
@@ -75,6 +73,9 @@ param set RTL_RETURN_ALT 10.0
 param set MPC_TKO_RAMP_T 0.0
 param set MPC_TKO_SPEED 3.0
 
+param set COM_OBL_ACT 2
+param set COM_OBL_RC_ACT 5
+
 param set PWM_MAX 1850
 param set PWM_MIN 1000
 
@@ -90,32 +91,29 @@ param set PWM_MAIN_SCALE3 1.00074019
 param set PWM_MAIN_SCALE4 1.00000000
 
 # Adaptive
-param set MPC_X_ADAPTIVE 0
+param set MPC_X_ADAP_EN 0
 
-param set MRAC_WN 1.2
-param set MRAC_ZETA 0.8
-param set MRAC_ZERO 5
-param set MRAC_SGN_K 1
-param set MRAC_LAMBDA 100
-param set MRAC_GAIN_W11 150
-param set MRAC_GAIN_W12 150
-param set MRAC_GAIN_W21 150
-param set MRAC_GAIN_W22 750
-param set MRAC_GAIN_YP 0.03
-param set MRAC_GAIN_R 0.06
-param set MRAC_GAIN_RHO 0.03
-param set MRAC_INIT_THE11 105
-param set MRAC_INIT_THE12 490.1934
-param set MRAC_INIT_THE21 377.0628
-param set MRAC_INIT_THE22 1821.7
-param set MRAC_INIT_THE3 -3.6538
-param set MRAC_INIT_C0 0.0103
-param set MRAC_ADAP_MARGIN 0.025
-param set MRAC_LEAKAGE 0.001
+param set MPC_MRAC_WN 0.8
+param set MPC_MRAC_SGN_K 1
+param set MPC_MRAC_LMBDWN 50
+param set MPC_MRAC_LMBDZT 0.9
+param set MPC_MRAC_UP_NORM 125.5680
+param set MPC_MRAC_GAINW11 0
+param set MPC_MRAC_GAINW12 0
+param set MPC_MRAC_GAINW21 0
+param set MPC_MRAC_GAINW22 0
+param set MPC_MRAC_GAINYP 10000
+param set MPC_MRAC_GAINR 1250
+param set MPC_MRAC_GAINRO 2
+param set MPC_MRACI_THE11 90
+param set MPC_MRACI_THE12 2499
+param set MPC_MRACI_THE21 25204
+param set MPC_MRACI_THE22 1012500
+param set MPC_MRACI_THE3 -408.6
+param set MPC_MRACI_C0 3.6
 
 # PID X Adaptive
-param set MPC_ADAPTIVE_X_P 0.3
-param set MPC_ADAPTIVE_X_I 0.001
+param set MPC_ADAP_X_P 0.25
 
 set MIXER griffin
 set PWM_OUT 12345678
