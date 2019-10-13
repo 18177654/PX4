@@ -54,23 +54,33 @@ PositionControl::PositionControl(ModuleParams *parent) :
 	c0 = _param_mpc_mrac_init_c0.get();
 	rho = 1.0f/_param_mpc_mrac_init_c0.get();
 
-	w11 = 0.0f;
-	w12 = 0.0f;
-	w21 = 0.0f;
-	w22 = 0.0f;
+	w11_1 = 0.0f;
+    w12_1 = 0.0f;
+    w21_1 = 0.0f;
+    w22_1 = 0.0f;
+    w11_2 = 0.0f;
+    w12_2 = 0.0f;
+    w21_2 = 0.0f;
+    w22_2 = 0.0f;
 
-	ym_x = 0.0f;
-	uf_x = 0.0f;
-	ym = 0.0f;
-	up_prev = 0.0f;
-	c_x = 0.0f;
+    ym_1 = 0.0f;
+    uf_1 = 0.0f;
+    phi11_1 = 0.0f;
+    phi12_1 = 0.0f;
+    phi21_1 = 0.0f;
+    phi22_1 = 0.0f;
+    phi3_1 = 0.0f;
+    phi4_1 = 0.0f;
 
-	phi11_x = 0.0f;
-	phi12_x = 0.0f;
-	phi21_x = 0.0f;
-	phi21_x = 0.0f;
-	phi3_x = 0.0f;
-	phi4_x = 0.0f;
+    ua_1 = 0.0f;
+    e1_1 = 0.0f;
+
+    r_1 = 0.0f;
+    up_1 = 0.0f;
+    up_2 = 0.0f;
+    up_3 = 0.0f;
+    yp_1 = 0.0f;
+    yp_2 = 0.0f;
 }
 
 void PositionControl::updateState(const PositionControlStates &states)
@@ -387,69 +397,61 @@ float PositionControl::_adaptiveDirectMRACNormalized(float dt, float r, float yp
 
 	float adap_gain_rho = _param_mpc_mrac_gain_rho.get();
 
-	// float the11_init = _param_mpc_mrac_init_the11.get();
-	// float the12_init = _param_mpc_mrac_init_the12.get();
-	// float the21_init = _param_mpc_mrac_init_the21.get();
-	// float the22_init = _param_mpc_mrac_init_the22.get();
-	// float the3_init = _param_mpc_mrac_init_the3.get();
-	// float c0_init = _param_mpc_mrac_init_c0.get();
+	float leak_bound11 = _param_mpc_mrac_leak11_bound.get();
+	float leak_bound12 = _param_mpc_mrac_leak12_bound.get();
+	float leak_bound21 = _param_mpc_mrac_leak21_bound.get();
+	float leak_bound22 = _param_mpc_mrac_leak22_bound.get();
+	float leak_bound3 = _param_mpc_mrac_leak3_bound.get();
+	float leak_bound4 = _param_mpc_mrac_leak4_bound.get();
+
+	float leak_gain11 = _param_mpc_mrac_leak11_gain.get();
+	float leak_gain12 = _param_mpc_mrac_leak12_gain.get();
+	float leak_gain21 = _param_mpc_mrac_leak21_gain.get();
+	float leak_gain22 = _param_mpc_mrac_leak22_gain.get();
+	float leak_gain3 = _param_mpc_mrac_leak3_gain.get();
+	float leak_gain4 = _param_mpc_mrac_leak4_gain.get();
+
+	float err_tau = _param_mpc_mrac_perf_tau.get();
+
+	float the11_init = _param_mpc_mrac_init_the11.get();
+	float the12_init = _param_mpc_mrac_init_the12.get();
+	float the21_init = _param_mpc_mrac_init_the21.get();
+	float the22_init = _param_mpc_mrac_init_the22.get();
+	float the3_init = _param_mpc_mrac_init_the3.get();
+	float c0_init = _param_mpc_mrac_init_c0.get();
 
 	// Variables
-	float up;
-
-    float w11_dot, w12_dot, w21_dot, w22_dot;
+    float w11, w12, w21, w22;
     float rho_dot;
 
-    float ym_x_dot;
-    float uf_x_dot, uf;
-    float phi11_x_dot, phi11, phi12_x_dot, phi12, phi21_x_dot, phi21, phi22_x_dot, phi22, phi3_x_dot, phi3, phi4_x_dot, phi4;
+    float ym, up, uf;
+    float phi11, phi12, phi21, phi22, phi3, phi4;
     float eps, e1, e1_hat, err_norm, ns2;
 
     float the11_dot, the12_dot, the21_dot, the22_dot, the3_dot, c0_dot;
-    // float leak11, leak12, leak21, leak22, leak3, leak4;
+    float leak11, leak12, leak21, leak22, leak3, leak4;
 
-    // float c_x_dot, ua;
-	PX4_INFO("dt: %f\n", (double)dt);
+    float ua;
 
-	// Calculate reference model
-    ym_x_dot = -wm*ym_x + r;
-    ym_x = ym_x + ym_x_dot*dt;
-    ym = wm*ym_x;
+    // Calculate reference model
+    ym = ref_model(r, r_1, ym_1, wm, dt);
 
     // Calculate omega states
-    w11_dot = -2*lambda_omega*lambda_zeta*w11 -lambda_omega*lambda_omega*w12 + up_prev;
-    w12_dot = w11;
-    w11 = w11 + w11_dot*dt;
-    w12 = w12 + w12_dot*dt;
-    w21_dot = -2*lambda_omega*lambda_zeta*w21 -lambda_omega*lambda_omega*w22 + yp;
-    w22_dot = w21;
-    w21 = w21 + w21_dot*dt;
-    w22 = w22 + w22_dot*dt;
+    w11 = omega1(up_1, up_3, w11_1, w11_2, lambda_omega, lambda_zeta, dt);
+    w12 = omega2(up_1, up_2, up_3, w12_1, w12_2, lambda_omega, lambda_zeta, dt);
+    w21 = omega1(yp, yp_2, w21_1, w21_2, lambda_omega, lambda_zeta, dt);
+    w22 = omega2(yp, yp_1, yp_2, w22_1, w22_2, lambda_omega, lambda_zeta, dt);
 
     // Calculate filtered input
-    uf_x_dot = -wm*uf_x + up_prev;
-    uf_x = uf_x + uf_x_dot*dt;
-    uf = wm*uf_x;
+    uf = ref_model(up_1, up_2, uf_1, wm, dt);
 
     // Calculate filtered states
-    phi11_x_dot = -wm*phi11_x + w11;
-    phi11_x = phi11_x + phi11_x_dot*dt;
-    phi11 = wm*phi11_x;
-    phi12_x_dot = -wm*phi12_x + w12;
-    phi12_x = phi12_x + phi12_x_dot*dt;
-    phi12 = wm*phi12_x;
-    phi21_x_dot = -wm*phi21_x + w21;
-    phi21_x = phi21_x + phi21_x_dot*dt;
-    phi21 = wm*phi21_x;
-    phi22_x_dot = -wm*phi22_x + w22;
-    phi22_x = phi22_x + phi22_x_dot*dt;
-    phi22 = wm*phi22_x;
-    phi3_x_dot = -wm*phi3_x + yp;
-    phi3_x = phi3_x + phi3_x_dot*dt;
-    phi3 = wm*phi3_x;
-    phi4_x_dot = -wm*phi4_x + r;
-    phi4_x = phi4_x + phi4_x_dot*dt;
-    phi4 = wm*phi4_x;
+    phi11 = ref_model(w11, w11_1, phi11_1, wm, dt);
+    phi12 = ref_model(w12, w12_1, phi12_1, wm, dt);
+    phi21 = ref_model(w21, w21_1, phi21_1, wm, dt);
+    phi22 = ref_model(w22, w22_1, phi22_1, wm, dt);
+    phi3 = ref_model(yp, yp_1, phi3_1, wm, dt);
+    phi4 = ref_model(r, r_1, phi4_1, wm, dt);
 
     // Calculate normalized error
     eps = uf - (the11*phi11 + the12*phi12 + the21*phi21 + the22*phi22 + the3*phi3 + c0*phi4);
@@ -462,55 +464,55 @@ float PositionControl::_adaptiveDirectMRACNormalized(float dt, float r, float yp
     rho = rho + rho_dot*dt;
 
     // Update leakage gains
-    // if(abs(the11) < leak_bound11)
-    //     leak11 = 0;
-    // else if(abs(the11) > 2*leak_bound11)
-    //     leak11 = leak_gain11;
-    // else
-    //     leak11 = leak_gain11*(abs(the11)/leak_bound11 - 1.0f);
+    if(fabsf(the11) < leak_bound11)
+        leak11 = 0;
+    else if(fabsf(the11) > 2*leak_bound11)
+        leak11 = leak_gain11;
+    else
+        leak11 = leak_gain11*(fabsf(the11)/leak_bound11 - 1.0f);
 
-    // if(abs(the12) < leak_bound12)
-    //     leak12 = 0;
-    // else if(abs(the12) > 2*leak_bound12)
-    //     leak12 = leak_gain12;
-    // else
-    //     leak12 = leak_gain12*(abs(the12)/leak_bound12 - 1.0f);
+    if(fabsf(the12) < leak_bound12)
+        leak12 = 0;
+    else if(fabsf(the12) > 2*leak_bound12)
+        leak12 = leak_gain12;
+    else
+        leak12 = leak_gain12*(fabsf(the12)/leak_bound12 - 1.0f);
 
-    // if(abs(the21) < leak_bound21)
-    //     leak21 = 0;
-    // else if(abs(the21) > 2*leak_bound21)
-    //     leak21 = leak_gain21;
-    // else
-    //     leak21 = leak_gain21*(abs(the21)/leak_bound21 - 1.0f);
+    if(fabsf(the21) < leak_bound21)
+        leak21 = 0;
+    else if(fabsf(the21) > 2*leak_bound21)
+        leak21 = leak_gain21;
+    else
+        leak21 = leak_gain21*(fabsf(the21)/leak_bound21 - 1.0f);
 
-    // if(abs(the22) < leak_bound22)
-    //     leak22 = 0;
-    // else if(abs(the22) > 2*leak_bound22)
-    //     leak22 = leak_gain22;
-    // else
-    //     leak22 = leak_gain22*(abs(the22)/leak_bound22 - 1.0f);
+    if(fabsf(the22) < leak_bound22)
+        leak22 = 0;
+    else if(fabsf(the22) > 2*leak_bound22)
+        leak22 = leak_gain22;
+    else
+        leak22 = leak_gain22*(fabsf(the22)/leak_bound22 - 1.0f);
 
-    // if(abs(the3) < leak_bound3)
-    //     leak3 = 0;
-    // else if(abs(the3) > 2*leak_bound3)
-    //     leak3 = leak_gain3;
-    // else
-    //     leak3 = leak_gain3*(abs(the3)/leak_bound3 - 1.0f);
+    if(fabsf(the3) < leak_bound3)
+        leak3 = 0;
+    else if(fabsf(the3) > 2*leak_bound3)
+        leak3 = leak_gain3;
+    else
+        leak3 = leak_gain3*(fabsf(the3)/leak_bound3 - 1.0f);
 
-    // if(abs(c0) < leak_bound4)
-    //     leak4 = 0;
-    // else if(abs(c0) > 2*leak_bound4)
-    //     leak4 = leak_gain4;
-    // else
-    //     leak4 = leak_gain4*(abs(c0)/leak_bound4 - 1.0f);
+    if(fabsf(c0) < leak_bound4)
+        leak4 = 0;
+    else if(fabsf(c0) > 2*leak_bound4)
+        leak4 = leak_gain4;
+    else
+        leak4 = leak_gain4*(fabsf(c0)/leak_bound4 - 1.0f);
 
     // Update estimates
-    the11_dot = -adap_gain_w11*(err_norm*phi11*sgn_k);// + leak11*(the11 - the11_init));
-    the12_dot = -adap_gain_w12*(err_norm*phi12*sgn_k);// + leak12*(the12 - the12_init));
-    the21_dot = -adap_gain_w21*(err_norm*phi21*sgn_k);// + leak21*(the21 - the21_init));
-    the22_dot = -adap_gain_w22*(err_norm*phi22*sgn_k);// + leak22*(the22 - the22_init));
-    the3_dot = -adap_gain_yp*(err_norm*phi3*sgn_k);// + leak3*(the3 - the3_init));
-    c0_dot = -adap_gain_r*(err_norm*phi4*sgn_k);// + leak4*(c0 - c0_init));
+    the11_dot = -adap_gain_w11*(err_norm*phi11*sgn_k + leak11*(the11 - the11_init));
+    the12_dot = -adap_gain_w12*(err_norm*phi12*sgn_k + leak12*(the12 - the12_init));
+    the21_dot = -adap_gain_w21*(err_norm*phi21*sgn_k + leak21*(the21 - the21_init));
+    the22_dot = -adap_gain_w22*(err_norm*phi22*sgn_k + leak22*(the22 - the22_init));
+    the3_dot = -adap_gain_yp*(err_norm*phi3*sgn_k + leak3*(the3 - the3_init));
+    c0_dot = -adap_gain_r*(err_norm*phi4*sgn_k + leak4*(c0 - c0_init));
 
     the11 = the11 + the11_dot*dt;
     the12 = the12 + the12_dot*dt;
@@ -520,17 +522,64 @@ float PositionControl::_adaptiveDirectMRACNormalized(float dt, float r, float yp
     c0 = c0 + c0_dot*dt;
 
     // Update performance term
-    // c_x_dot = e1;
-    // c_x = c_x + c_x_dot*dt;
-    // ua = m_quad*(wm/err_tau)*c_x + m_quad/err_tau*e1;
+    c0 = 4.5f*wm;
+    ua = (1.0f/(2.0f*err_tau*wm))*(c0*(wm*dt + 2.0f)*e1 + c0*(wm*dt - 2.0f)*e1_1 + 2.0f*err_tau*wm*ua_1);
 
     // Control law
-    up = (the11*w11 + the12*w12 + the21*w21 + the22*w22 + the3*yp + c0*r)/up_norm;
+    up = (the11*w11 + the12*w12 + the21*w21 + the22*w22 + the3*yp + c0*r - ua)/up_norm;
 
     // Store control signal
-    up_prev = up;
+    up_3 = up_2;
+    up_2 = up_1;
+    up_1 = up;
+    yp_2 = yp_1;
+    yp_1 = yp;
+
+    ym_1 = ym;
+    r_1 = r;
+    uf_1 = uf;
+
+    w11_2 = w11_1;
+    w11_1 = w11;
+    w12_2 = w12_1;
+    w12_1 = w12;
+    w21_2 = w21_1;
+    w21_1 = w21;
+    w22_2 = w22_1;
+    w22_1 = w22;
+
+    phi11_1 = phi11;
+    phi12_1 = phi12;
+    phi21_1 = phi21;
+    phi22_1 = phi22;
+    phi3_1 = phi3;
+    phi4_1 = phi4;
+
+    e1_1 = e1;
+    ua_1 = ua;
 
 	return up;
+}
+
+float PositionControl::ref_model(float u, float u_1, float y_1, float wm, float dt)
+{
+    return (1.0f/(wm*dt + 2.0f))*(wm*dt*u + wm*dt*u_1 - (wm*dt - 2.0f)*y_1);
+}
+
+float PositionControl::omega1(float u, float u_2, float y_1, float y_2, float lambda_wn, float lambda_zeta, float dt)
+{
+    float lambda1 = 2.0f*lambda_wn*lambda_zeta;
+    float lambda0 = lambda_wn*lambda_wn;
+
+    return (1.0f/(4.0f + 2.0f*lambda1*dt + dt*dt*lambda0))*(2.0f*dt*u - 2.0f*dt*u_2 - (2.0f*dt*dt*lambda0 - 8.0f)*y_1 - (4.0f - 2.0f*dt*lambda1 + dt*dt*lambda0)*y_2);
+}
+
+float PositionControl::omega2(float u, float u_1, float u_2, float y_1, float y_2, float lambda_wn, float lambda_zeta, float dt)
+{
+    float lambda1 = 2.0f*lambda_wn*lambda_zeta;
+    float lambda0 = lambda_wn*lambda_wn;
+
+    return (1.0f/(4.0f + 2.0f*lambda1*dt + dt*dt*lambda0))*(dt*dt*u + 2.0f*dt*dt*u_1 + dt*dt*u_2 - (2.0f*dt*dt*lambda0 - 8.0f)*y_1 - (4.0f - 2.0f*dt*lambda1 + dt*dt*lambda0)*y_2);
 }
 
 void PositionControl::updateConstraints(const vehicle_constraints_s &constraints)

@@ -544,7 +544,7 @@ MulticopterPositionControl::run()
 	_home_pos_sub = orb_subscribe(ORB_ID(home_position));
 
 	_local_pos_sub = orb_subscribe(ORB_ID(vehicle_local_position));
-	orb_set_interval(_local_pos_sub, 4); // 250 Hz updates
+	orb_set_interval(_local_pos_sub, 20); // 50 Hz updates
 
 	// get initial values for all parameters and subscribtions
 	parameters_update(true);
@@ -556,9 +556,9 @@ MulticopterPositionControl::run()
 	poll_fd.events = POLLIN;
 
 	while (!should_exit()) {
-		// poll for new data on the local position state topic (wait for up to 4ms)
-		const int poll_return = px4_poll(&poll_fd, 1, 4);
-		// poll_return == 0: go through the loop anyway to copy manual input at 250 Hz
+		// poll for new data on the local position state topic (wait for up to 20ms)
+		const int poll_return = px4_poll(&poll_fd, 1, 20);
+		// poll_return == 0: go through the loop anyway to copy manual input at 50 Hz
 		// this is undesirable but not much we can do
 		if (poll_return < 0) {
 			PX4_ERR("poll error %d %d", poll_return, errno);

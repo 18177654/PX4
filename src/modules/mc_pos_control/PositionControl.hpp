@@ -229,12 +229,12 @@ public:
 
 	float getMracU()
 	{
-		return up_prev;
+		return up_1;
 	}
 
 	float getMracYm()
 	{
-		return ym;
+		return ym_1;
 	}
 
 protected:
@@ -271,17 +271,26 @@ private:
 	bool _ctrl_pos[3] = {true, true, true}; /**< True if the control-loop for position was used */
 	bool _ctrl_vel[3] = {true, true, true}; /**< True if the control-loop for velocity was used */
 
+	// Adaptive Controller helper functions.
+	float ref_model(float u, float u_1, float y_1, float wm, float dt);
+	float omega1(float u, float u_2, float y_1, float y_2, float lambda_wn, float lambda_zeta, float dt);
+	float omega2(float u, float u_1, float u_2, float y_1, float y_2, float lambda_wn, float lambda_zeta, float dt);
+
+
 	// Adaptive Controller global variables.
 	float rho;
 	float the11, the12, the21, the22, the3, c0;
 
-	float w11, w12, w21, w22;
-	float ym_x, uf_x;
-	float phi11_x, phi12_x, phi21_x, phi22_x, phi3_x, phi4_x;
+	float w11_1, w12_1, w21_1, w22_1, w11_2, w12_2, w21_2, w22_2;
 
-	float c_x;
+	float ym_1, uf_1;
+	float phi11_1, phi12_1, phi21_1, phi22_1, phi3_1, phi4_1;
 
-	float ym, up_prev;
+	float ua_1, e1_1;
+
+	float r_1;
+	float up_1, up_2, up_3;
+	float yp_1, yp_2;
 
 	DEFINE_PARAMETERS(
 		(ParamFloat<px4::params::MPC_THR_MAX>) _param_mpc_thr_max,
@@ -322,6 +331,19 @@ private:
 		(ParamFloat<px4::params::MPC_MRACI_THE22>) _param_mpc_mrac_init_the22,
 		(ParamFloat<px4::params::MPC_MRACI_THE3>) _param_mpc_mrac_init_the3,
 		(ParamFloat<px4::params::MPC_MRACI_C0>) _param_mpc_mrac_init_c0,
+		(ParamFloat<px4::params::MPC_MRAC_LEAK11B>) _param_mpc_mrac_leak11_bound,
+		(ParamFloat<px4::params::MPC_MRAC_LEAK12B>) _param_mpc_mrac_leak12_bound,
+		(ParamFloat<px4::params::MPC_MRAC_LEAK21B>) _param_mpc_mrac_leak21_bound,
+		(ParamFloat<px4::params::MPC_MRAC_LEAK22B>) _param_mpc_mrac_leak22_bound,
+		(ParamFloat<px4::params::MPC_MRAC_LEAK3B>) _param_mpc_mrac_leak3_bound,
+		(ParamFloat<px4::params::MPC_MRAC_LEAK4B>) _param_mpc_mrac_leak4_bound,
+		(ParamFloat<px4::params::MPC_MRAC_LEAK11G>) _param_mpc_mrac_leak11_gain,
+		(ParamFloat<px4::params::MPC_MRAC_LEAK12G>) _param_mpc_mrac_leak12_gain,
+		(ParamFloat<px4::params::MPC_MRAC_LEAK21G>) _param_mpc_mrac_leak21_gain,
+		(ParamFloat<px4::params::MPC_MRAC_LEAK22G>) _param_mpc_mrac_leak22_gain,
+		(ParamFloat<px4::params::MPC_MRAC_LEAK3G>) _param_mpc_mrac_leak3_gain,
+		(ParamFloat<px4::params::MPC_MRAC_LEAK4G>) _param_mpc_mrac_leak4_gain,
+		(ParamFloat<px4::params::MPC_MRAC_P_TAU>) _param_mpc_mrac_perf_tau,
 		(ParamFloat<px4::params::MPC_X_VEL_P>) _param_mpc_x_vel_p,
 		(ParamFloat<px4::params::MPC_X_VEL_I>) _param_mpc_x_vel_i,
 		(ParamFloat<px4::params::MPC_X_VEL_D>) _param_mpc_x_vel_d,

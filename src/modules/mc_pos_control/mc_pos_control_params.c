@@ -375,6 +375,110 @@ PARAM_DEFINE_FLOAT(MPC_MRACI_THE3, -408.6f);
 PARAM_DEFINE_FLOAT(MPC_MRACI_C0, 3.6f);
 
 /**
+ * Leakage bound for the11 parameter of MRAC
+ *
+ * @decimal 6
+ * @group Multicopter Position Control
+ */
+PARAM_DEFINE_FLOAT(MPC_MRAC_LEAK11B, 10000000.0f);
+
+/**
+ * Leakage bound for the12 parameter of MRAC
+ *
+ * @decimal 6
+ * @group Multicopter Position Control
+ */
+PARAM_DEFINE_FLOAT(MPC_MRAC_LEAK12B, 10000000.0f);
+
+/**
+ * Leakage bound for the21 parameter of MRAC
+ *
+ * @decimal 6
+ * @group Multicopter Position Control
+ */
+PARAM_DEFINE_FLOAT(MPC_MRAC_LEAK21B, 10000000.0f);
+
+/**
+ * Leakage bound for the22 parameter of MRAC
+ *
+ * @decimal 6
+ * @group Multicopter Position Control
+ */
+PARAM_DEFINE_FLOAT(MPC_MRAC_LEAK22B, 10000000.0f);
+
+/**
+ * Leakage bound for the3 parameter of MRAC
+ *
+ * @decimal 6
+ * @group Multicopter Position Control
+ */
+PARAM_DEFINE_FLOAT(MPC_MRAC_LEAK3B, 412.425f);
+
+/**
+ * Leakage bound for c0 parameter of MRAC
+ *
+ * @decimal 6
+ * @group Multicopter Position Control
+ */
+PARAM_DEFINE_FLOAT(MPC_MRAC_LEAK4B, 7.4250f);
+
+/**
+ * Leakage gain for the11 parameter of MRAC
+ *
+ * @decimal 6
+ * @group Multicopter Position Control
+ */
+PARAM_DEFINE_FLOAT(MPC_MRAC_LEAK11G, 0.0f);
+
+/**
+ * Leakage gain for the12 parameter of MRAC
+ *
+ * @decimal 6
+ * @group Multicopter Position Control
+ */
+PARAM_DEFINE_FLOAT(MPC_MRAC_LEAK12G, 0.0f);
+
+/**
+ * Leakage gain for the21 parameter of MRAC
+ *
+ * @decimal 6
+ * @group Multicopter Position Control
+ */
+PARAM_DEFINE_FLOAT(MPC_MRAC_LEAK21G, 0.0f);
+
+/**
+ * Leakage gain for the22 parameter of MRAC
+ *
+ * @decimal 6
+ * @group Multicopter Position Control
+ */
+PARAM_DEFINE_FLOAT(MPC_MRAC_LEAK22G, 0.0f);
+
+/**
+ * Leakage gain for the3 parameter of MRAC
+ *
+ * @decimal 6
+ * @group Multicopter Position Control
+ */
+PARAM_DEFINE_FLOAT(MPC_MRAC_LEAK3G, 0.00002f);
+
+/**
+ * Leakage gain for c0 parameter of MRAC
+ *
+ * @decimal 6
+ * @group Multicopter Position Control
+ */
+PARAM_DEFINE_FLOAT(MPC_MRAC_LEAK4G, 0.00002f);
+
+/**
+ * Performance improvement time constant parameter of MRAC
+ *
+ * @decimal 6
+ * @group Multicopter Position Control
+ */
+PARAM_DEFINE_FLOAT(MPC_MRAC_P_TAU, 0.4f);
+
+/**
  * Proportional gain for horizontal position error
  *
  * @min 0.0
