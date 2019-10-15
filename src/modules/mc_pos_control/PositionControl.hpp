@@ -227,6 +227,11 @@ public:
 		return rho;
 	}
 
+	float getMracUa()
+	{
+		return ua_1;
+	}
+
 	float getMracU()
 	{
 		return up_1;
@@ -344,6 +349,12 @@ private:
 		(ParamFloat<px4::params::MPC_MRAC_LEAK3G>) _param_mpc_mrac_leak3_gain,
 		(ParamFloat<px4::params::MPC_MRAC_LEAK4G>) _param_mpc_mrac_leak4_gain,
 		(ParamFloat<px4::params::MPC_MRAC_P_TAU>) _param_mpc_mrac_perf_tau,
+		(ParamFloat<px4::params::MPC_MRAC_BOUND11>) _param_mpc_mrac_bound11,
+		(ParamFloat<px4::params::MPC_MRAC_BOUND12>) _param_mpc_mrac_bound12,
+		(ParamFloat<px4::params::MPC_MRAC_BOUND21>) _param_mpc_mrac_bound21,
+		(ParamFloat<px4::params::MPC_MRAC_BOUND22>) _param_mpc_mrac_bound22,
+		(ParamFloat<px4::params::MPC_MRAC_BOUND3>) _param_mpc_mrac_bound3,
+		(ParamFloat<px4::params::MPC_MRAC_BOUND4>) _param_mpc_mrac_bound4,
 		(ParamFloat<px4::params::MPC_X_VEL_P>) _param_mpc_x_vel_p,
 		(ParamFloat<px4::params::MPC_X_VEL_I>) _param_mpc_x_vel_i,
 		(ParamFloat<px4::params::MPC_X_VEL_D>) _param_mpc_x_vel_d,

@@ -722,6 +722,7 @@ MulticopterPositionControl::run()
 			mrac_msg.the3 = _control.getMracThe3();
 			mrac_msg.c0 = _control.getMracC0();
 			mrac_msg.rho = _control.getMracRho();
+			mrac_msg.ua = _control.getMracUa();
 			mrac_msg.u = _control.getMracU();
 			mrac_msg.ym = _control.getMracYm();
 			publish_mrac(mrac_msg);

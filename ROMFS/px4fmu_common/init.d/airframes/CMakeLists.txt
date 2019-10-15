@@ -38,8 +38,8 @@ px4_add_romfs_files(
 	1000_rc_fw_easystar.hil
 	1001_rc_quad_x.hil
 	1002_standard_vtol.hil
-	1004_griffin.hil
 	1003_griffin_payload.hil
+	1004_griffin.hil
 	1005_honeybee.hil
 	1100_rc_quad_x_sih.hil
 

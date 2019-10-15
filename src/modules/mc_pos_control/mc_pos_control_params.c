@@ -479,6 +479,54 @@ PARAM_DEFINE_FLOAT(MPC_MRAC_LEAK4G, 0.00002f);
 PARAM_DEFINE_FLOAT(MPC_MRAC_P_TAU, 0.4f);
 
 /**
+ * Upper bound for the11 parameter of MRAC
+ *
+ * @decimal 6
+ * @group Multicopter Position Control
+ */
+PARAM_DEFINE_FLOAT(MPC_MRAC_BOUND11, 10000000.0f);
+
+/**
+ * Upper bound for the12 parameter of MRAC
+ *
+ * @decimal 6
+ * @group Multicopter Position Control
+ */
+PARAM_DEFINE_FLOAT(MPC_MRAC_BOUND12, 10000000.0f);
+
+/**
+ * Upper bound for the21 parameter of MRAC
+ *
+ * @decimal 6
+ * @group Multicopter Position Control
+ */
+PARAM_DEFINE_FLOAT(MPC_MRAC_BOUND21, 10000000.0f);
+
+/**
+ * Upper bound for the22 parameter of MRAC
+ *
+ * @decimal 6
+ * @group Multicopter Position Control
+ */
+PARAM_DEFINE_FLOAT(MPC_MRAC_BOUND22, 10000000.0f);
+
+/**
+ * Upper bound for the3 parameter of MRAC
+ *
+ * @decimal 6
+ * @group Multicopter Position Control
+ */
+PARAM_DEFINE_FLOAT(MPC_MRAC_BOUND3, -414.9f);
+
+/**
+ * Upper bound for c0 parameter of MRAC
+ *
+ * @decimal 6
+ * @group Multicopter Position Control
+ */
+PARAM_DEFINE_FLOAT(MPC_MRAC_BOUND4, 9.9f);
+
+/**
  * Proportional gain for horizontal position error
  *
  * @min 0.0

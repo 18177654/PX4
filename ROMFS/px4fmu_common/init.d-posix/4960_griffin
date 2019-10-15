@@ -47,8 +47,8 @@ param set MPC_MAN_TILT_MAX 30.0
 
 param set MPC_VELD_LP 5.0
 
-param set MPC_X_P 0.4
-param set MPC_Y_P 0.4
+param set MPC_X_P 0.35
+param set MPC_Y_P 0.35
 param set MPC_X_VEL_P 0.048
 param set MPC_X_VEL_I 0.008
 param set MPC_X_VEL_D 0.002
@@ -82,8 +82,8 @@ param set PWM_MIN 1000
 param set MPC_THR_CURVE 1
 param set MPC_THR_HOVER 0.35
 param set MPC_THR_MAX 1.0
-param set MPC_THR_MIN 0.08
-param set MPC_MANTHR_MIN 0.08
+param set MPC_THR_MIN 0.1
+param set MPC_MANTHR_MIN 0.1
 
 param set PWM_MAIN_SCALE1 1.01315789
 param set PWM_MAIN_SCALE2 1.00442478
@@ -104,7 +104,7 @@ param set MPC_MRAC_GAINW21 0
 param set MPC_MRAC_GAINW22 0
 param set MPC_MRAC_GAINYP 2000
 param set MPC_MRAC_GAINR 250
-param set MPC_MRAC_GAINRO 2
+param set MPC_MRAC_GAINRO 0.5
 param set MPC_MRACI_THE11 90
 param set MPC_MRACI_THE12 2499
 param set MPC_MRACI_THE21 25204
@@ -124,6 +124,12 @@ param set MPC_MRAC_LEAK22G 0
 param set MPC_MRAC_LEAK3G 0.00002
 param set MPC_MRAC_LEAK4G 0.00002
 param set MPC_MRAC_P_TAU 0.4
+param set MPC_MRAC_BOUND11 10000000
+param set MPC_MRAC_BOUND12 10000000
+param set MPC_MRAC_BOUND21 10000000
+param set MPC_MRAC_BOUND22 10000000
+param set MPC_MRAC_BOUND3 -414.9
+param set MPC_MRAC_BOUND4 9.9
 
 # PID X Adaptive
 param set MPC_ADAP_X_P 0.25

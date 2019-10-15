@@ -413,6 +413,13 @@ float PositionControl::_adaptiveDirectMRACNormalized(float dt, float r, float yp
 
 	float err_tau = _param_mpc_mrac_perf_tau.get();
 
+	float bound11 = _param_mpc_mrac_bound11.get();
+	float bound12 = _param_mpc_mrac_bound12.get();
+	float bound21 = _param_mpc_mrac_bound21.get();
+	float bound22 = _param_mpc_mrac_bound22.get();
+	float bound3 = _param_mpc_mrac_bound3.get();
+	float bound4 = _param_mpc_mrac_bound4.get();
+
 	float the11_init = _param_mpc_mrac_init_the11.get();
 	float the12_init = _param_mpc_mrac_init_the12.get();
 	float the21_init = _param_mpc_mrac_init_the21.get();
@@ -515,11 +522,28 @@ float PositionControl::_adaptiveDirectMRACNormalized(float dt, float r, float yp
     c0_dot = -adap_gain_r*(err_norm*phi4*sgn_k + leak4*(c0 - c0_init));
 
     the11 = the11 + the11_dot*dt;
+	if(fabsf(the11) > fabsf(bound11))
+        the11 = bound11;
+
     the12 = the12 + the12_dot*dt;
+	if(fabsf(the12) > fabsf(bound12))
+        the12 = bound12;
+
     the21 = the21 + the21_dot*dt;
+	if(fabsf(the21) > fabsf(bound21))
+        the21 = bound21;
+
     the22 = the22 + the22_dot*dt;
+	if(fabsf(the22) > fabsf(bound22))
+        the22 = bound22;
+
     the3 = the3 + the3_dot*dt;
+	if(fabsf(the3) > fabsf(bound3))
+        the3 = bound3;
+
     c0 = c0 + c0_dot*dt;
+	if(fabsf(c0) > fabsf(bound4))
+        c0 = bound4;
 
     // Update performance term
     c0 = 4.5f*wm;

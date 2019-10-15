@@ -58,7 +58,7 @@ PARAM_DEFINE_FLOAT(PAYLOAD_VS, 5.0f);
  * @increment 0.01
  * @group Payload Angle
  */
-PARAM_DEFINE_FLOAT(PAYLOAD_R, 12.0f);
+PARAM_DEFINE_FLOAT(PAYLOAD_R, 13.35f);
 
 /**
  * Potentiometer of the payload angle estimator circuit.
@@ -80,7 +80,7 @@ PARAM_DEFINE_FLOAT(PAYLOAD_POT, 20.0f);
  * @increment 0.01
  * @group Payload Angle
  */
-PARAM_DEFINE_FLOAT(PAYLOAD_RANGE, 270.0f);
+PARAM_DEFINE_FLOAT(PAYLOAD_RANGE, 315.0f);
 
 /**
  * Bias the payload angle for the estimator to measure 0 degrees when payload has no angle.
@@ -91,7 +91,7 @@ PARAM_DEFINE_FLOAT(PAYLOAD_RANGE, 270.0f);
  * @increment 0.01
  * @group Payload Angle
  */
-PARAM_DEFINE_FLOAT(PAYLOAD_BIAS, -14.5f);
+PARAM_DEFINE_FLOAT(PAYLOAD_BIAS, -0.14f);
 
 /**
  * The cutoff frequency of the lowpass filter for the angle measurements (in hertz).
@@ -102,4 +102,4 @@ PARAM_DEFINE_FLOAT(PAYLOAD_BIAS, -14.5f);
  * @increment 0.01
  * @group Payload Angle
  */
-PARAM_DEFINE_FLOAT(PAYLOAD_CUTOFF, 1.0f);
+PARAM_DEFINE_FLOAT(PAYLOAD_CUTOFF, 0.2f);
