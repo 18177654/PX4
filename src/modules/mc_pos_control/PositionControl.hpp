@@ -192,54 +192,106 @@ public:
 	}
 
 	// Adaptive parameter GET methods.
-	float getMracThe11()
+	// X
+	float getMracThe11X()
 	{
-		return the11;
+		return the11_x;
 	}
 
-	float getMracThe12()
+	float getMracThe12X()
 	{
-		return the12;
+		return the12_x;
 	}
 
-	float getMracThe21()
+	float getMracThe21X()
 	{
-		return the21;
+		return the21_x;
 	}
 
-	float getMracThe22()
+	float getMracThe22X()
 	{
-		return the22;
+		return the22_x;
 	}
 
-	float getMracThe3()
+	float getMracThe3X()
 	{
-		return the3;
+		return the3_x;
 	}
 
-	float getMracC0()
+	float getMracC0X()
 	{
-		return c0;
+		return c0_x;
 	}
 
-	float getMracRho()
+	float getMracRhoX()
 	{
-		return rho;
+		return rho_x;
 	}
 
-	float getMracUa()
+	float getMracUaX()
 	{
-		return ua_1;
+		return ua_1_x;
 	}
 
-	float getMracU()
+	float getMracUX()
 	{
-		return up_1;
+		return up_1_x;
 	}
 
-	float getMracYm()
+	float getMracYmX()
 	{
-		return ym_1;
+		return ym_1_x;
+	}
+
+	// Y
+	float getMracThe11Y()
+	{
+		return the11_y;
+	}
+
+	float getMracThe12Y()
+	{
+		return the12_y;
+	}
+
+	float getMracThe21Y()
+	{
+		return the21_y;
+	}
+
+	float getMracThe22Y()
+	{
+		return the22_y;
+	}
+
+	float getMracThe3Y()
+	{
+		return the3_y;
+	}
+
+	float getMracC0Y()
+	{
+		return c0_y;
+	}
+
+	float getMracRhoY()
+	{
+		return rho_y;
+	}
+
+	float getMracUaY()
+	{
+		return ua_1_y;
+	}
+
+	float getMracUY()
+	{
+		return up_1_y;
+	}
+
+	float getMracYmY()
+	{
+		return ym_1_y;
 	}
 
 protected:
@@ -255,7 +307,8 @@ private:
 
 	void _positionController(); /** applies the P-position-controller */
 	void _velocityController(const float &dt); /** applies the PID-velocity-controller */
-	float _adaptiveDirectMRACNormalized(float T, float r, float yp); /** applies adaptive normalized direct MRAC for swinging payload */
+	float _adaptiveDirectMRACNormalizedX(float T, float r, float yp); /** applies adaptive normalized direct MRAC in the x-axis for swinging payload */
+	float _adaptiveDirectMRACNormalizedY(float T, float r, float yp); /** applies adaptive normalized direct MRAC in the y-axis for swinging payload */
 	void _setCtrlFlag(bool value); /**< set control-loop flags (only required for logging) */
 
 	matrix::Vector3f _pos{}; /**< MC position */
@@ -283,19 +336,35 @@ private:
 
 
 	// Adaptive Controller global variables.
-	float rho;
-	float the11, the12, the21, the22, the3, c0;
+	// X
+	float rho_x;
+	float the11_x, the12_x, the21_x, the22_x, the3_x, c0_x;
 
-	float w11_1, w12_1, w21_1, w22_1, w11_2, w12_2, w21_2, w22_2;
+	float w11_1_x, w12_1_x, w21_1_x, w22_1_x, w11_2_x, w12_2_x, w21_2_x, w22_2_x;
 
-	float ym_1, uf_1;
-	float phi11_1, phi12_1, phi21_1, phi22_1, phi3_1, phi4_1;
+	float ym_1_x, uf_1_x;
+	float phi11_1_x, phi12_1_x, phi21_1_x, phi22_1_x, phi3_1_x, phi4_1_x;
 
-	float ua_1, e1_1;
+	float ua_1_x, e1_1_x;
 
-	float r_1;
-	float up_1, up_2, up_3;
-	float yp_1, yp_2;
+	float r_1_x;
+	float up_1_x, up_2_x, up_3_x;
+	float yp_1_x, yp_2_x;
+
+	// Y
+	float rho_y;
+	float the11_y, the12_y, the21_y, the22_y, the3_y, c0_y;
+
+	float w11_1_y, w12_1_y, w21_1_y, w22_1_y, w11_2_y, w12_2_y, w21_2_y, w22_2_y;
+
+	float ym_1_y, uf_1_y;
+	float phi11_1_y, phi12_1_y, phi21_1_y, phi22_1_y, phi3_1_y, phi4_1_y;
+
+	float ua_1_y, e1_1_y;
+
+	float r_1_y;
+	float up_1_y, up_2_y, up_3_y;
+	float yp_1_y, yp_2_y;
 
 	DEFINE_PARAMETERS(
 		(ParamFloat<px4::params::MPC_THR_MAX>) _param_mpc_thr_max,
@@ -316,6 +385,8 @@ private:
 		(ParamFloat<px4::params::MPC_XY_P>) _param_mpc_xy_p,
 		(ParamInt<px4::params::MPC_X_ADAP_EN>) _param_mpc_x_adap_en,
 		(ParamFloat<px4::params::MPC_ADAP_X_P>) _param_mpc_x_adap_p,
+		(ParamInt<px4::params::MPC_Y_ADAP_EN>) _param_mpc_y_adap_en,
+		(ParamFloat<px4::params::MPC_ADAP_Y_P>) _param_mpc_y_adap_p,
 		(ParamFloat<px4::params::MPC_X_P>) _param_mpc_x_p,
 		(ParamFloat<px4::params::MPC_Y_P>) _param_mpc_y_p,
 		(ParamFloat<px4::params::MPC_MRAC_WN>) _param_mpc_mrac_wn,

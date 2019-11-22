@@ -118,9 +118,12 @@ private:
     int _orb_class_instance;
 
 	// Parameters
-	float acs_v_per_a;
+	float acs_a_per_v;
 	float mcp_lsb;
-	float mcp_bias;
+	float mcp_bias1;
+	float mcp_bias2;
+	float mcp_bias3;
+	float mcp_bias4;
 	float mot_curr_cutoff;
 
     uint8_t _current_motor; // represents the current motor current begin read
@@ -237,11 +240,11 @@ int MCP3428::init()
     }
 
 	// Fetch parameters
-	param_t handle = param_find("MOT_ACS_V_PER_A");
-	acs_v_per_a = 0.0f;
+	param_t handle = param_find("MOT_ACS_A_PER_V");
+	acs_a_per_v = 0.0f;
 
 	if (handle != PARAM_INVALID) {
-		param_get(handle, &acs_v_per_a);
+		param_get(handle, &acs_a_per_v);
 	}
 
 	handle = param_find("MOT_MCP_LSB");
@@ -251,11 +254,32 @@ int MCP3428::init()
 		param_get(handle, &mcp_lsb);
 	}
 
-	handle = param_find("MOT_MCP_BIAS");
-	mcp_bias = 0.0f;
+	handle = param_find("MOT_MCP_BIAS1");
+	mcp_bias1 = 0.0f;
 
 	if (handle != PARAM_INVALID) {
-		param_get(handle, &mcp_bias);
+		param_get(handle, &mcp_bias1);
+	}
+
+	handle = param_find("MOT_MCP_BIAS2");
+	mcp_bias2 = 0.0f;
+
+	if (handle != PARAM_INVALID) {
+		param_get(handle, &mcp_bias2);
+	}
+
+	handle = param_find("MOT_MCP_BIAS3");
+	mcp_bias3 = 0.0f;
+
+	if (handle != PARAM_INVALID) {
+		param_get(handle, &mcp_bias3);
+	}
+
+	handle = param_find("MOT_MCP_BIAS4");
+	mcp_bias4 = 0.0f;
+
+	if (handle != PARAM_INVALID) {
+		param_get(handle, &mcp_bias4);
 	}
 
 	handle = param_find("MOT_CURR_CUTOFF");
@@ -448,6 +472,7 @@ int MCP3428::collect() {
     uint16_t current_reading; // current reading in bits
     bool isValid; // represents whether the reading is valid
     float current; // current motor current reading in Amps
+	float bias; // bias of the current motor
 
     // Read from device
     ret = transfer(nullptr, 0, val, 3);
@@ -465,8 +490,25 @@ int MCP3428::collect() {
 
     // Only store the reading and move on to the next motor if the reading is valid.
     if(isValid) {
+		switch(_current_motor) {
+			case 0:
+				bias = float(mcp_bias1);
+				break;
+			case 1:
+				bias = float(mcp_bias2);
+				break;
+			case 2:
+				bias = float(mcp_bias3);
+				break;
+			case 3:
+				bias = float(mcp_bias4);
+				break;
+			default:
+				bias = 0.0f;
+		}
+
         // Convert reading to motor current Amps
-        current = ((float(current_reading) * float(mcp_lsb)) / float(acs_v_per_a)) + float(mcp_bias);
+        current = ((float(current_reading) * float(mcp_lsb) + bias) * float(acs_a_per_v));
 
         // Store reading
         report.motor_currents[channel_to_motor(_current_motor)] = current;

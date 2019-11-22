@@ -99,17 +99,21 @@ then
 
 	param set SER_TEL1_BAUD 921600
 
-	param set MOT_CURR_CUTOFF 0.5
-	param set ACS_V_PER_A 0.060
-	param set MCP_LSB 0.00025
-	param set MCP_BIAS -8.2125
+	param set MOT_CURR_CUTOFF 0.1
+	param set MOT_ACS_A_PER_V 37.5
+	param set MOT_MCP_LSB 0.00025
+	param set MOT_MCP_BIAS1 -0.525
+	param set MOT_MCP_BIAS2 -0.525
+	param set MOT_MCP_BIAS3 -0.525
+	param set MOT_MCP_BIAS4 -0.525
 
 	# Adaptive
 	param set MPC_X_ADAP_EN 0
+	param set MPC_Y_ADAP_EN 0
 
 	param set MPC_MRAC_WN 0.8
 	param set MPC_MRAC_SGN_K 1
-	param set MPC_MRAC_LMBDWN 50
+	param set MPC_MRAC_LMBDWN 8
 	param set MPC_MRAC_LMBDZT 0.9
 	param set MPC_MRAC_UP_NORM 125.5680
 	param set MPC_MRAC_GAINW11 0
@@ -118,18 +122,18 @@ then
 	param set MPC_MRAC_GAINW22 0
 	param set MPC_MRAC_GAINYP 2000
 	param set MPC_MRAC_GAINR 250
-	param set MPC_MRAC_GAINRO 0.5
-	param set MPC_MRACI_THE11 90
-	param set MPC_MRACI_THE12 2499
-	param set MPC_MRACI_THE21 25204
-	param set MPC_MRACI_THE22 1012500
-	param set MPC_MRACI_THE3 -408.6
+	param set MPC_MRAC_GAINRO 0.2
+	param set MPC_MRACI_THE11 14.4
+	param set MPC_MRACI_THE12 64
+	param set MPC_MRACI_THE21 645.12
+	param set MPC_MRACI_THE22 4147.2
+	param set MPC_MRACI_THE3 -68.4
 	param set MPC_MRACI_C0 3.6
 	param set MPC_MRAC_LEAK11B 10000000
 	param set MPC_MRAC_LEAK12B 10000000
 	param set MPC_MRAC_LEAK21B 10000000
 	param set MPC_MRAC_LEAK22B 10000000
-	param set MPC_MRAC_LEAK3B 412.425
+	param set MPC_MRAC_LEAK3B 72.2250
 	param set MPC_MRAC_LEAK4B 7.4250
 	param set MPC_MRAC_LEAK11G 0
 	param set MPC_MRAC_LEAK12G 0
@@ -142,11 +146,12 @@ then
 	param set MPC_MRAC_BOUND12 10000000
 	param set MPC_MRAC_BOUND21 10000000
 	param set MPC_MRAC_BOUND22 10000000
-	param set MPC_MRAC_BOUND3 -414.9
+	param set MPC_MRAC_BOUND3 -79.65
 	param set MPC_MRAC_BOUND4 9.9
 
 	# PID X Adaptive
 	param set MPC_ADAP_X_P 0.25
+	param set MPC_ADAP_Y_P 0.25
 fi
 
 if param compare SYS_HITL 0

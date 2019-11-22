@@ -715,16 +715,26 @@ MulticopterPositionControl::run()
 			// Publish MRAC message for logging.
 			struct mrac_s mrac_msg = {};
 			mrac_msg.timestamp = hrt_absolute_time();
-			mrac_msg.the11 = _control.getMracThe11();
-			mrac_msg.the12 = _control.getMracThe12();
-			mrac_msg.the21 = _control.getMracThe21();
-			mrac_msg.the22 = _control.getMracThe22();
-			mrac_msg.the3 = _control.getMracThe3();
-			mrac_msg.c0 = _control.getMracC0();
-			mrac_msg.rho = _control.getMracRho();
-			mrac_msg.ua = _control.getMracUa();
-			mrac_msg.u = _control.getMracU();
-			mrac_msg.ym = _control.getMracYm();
+			mrac_msg.the11_x = _control.getMracThe11X();
+			mrac_msg.the12_x = _control.getMracThe12X();
+			mrac_msg.the21_x = _control.getMracThe21X();
+			mrac_msg.the22_x = _control.getMracThe22X();
+			mrac_msg.the3_x = _control.getMracThe3X();
+			mrac_msg.c0_x = _control.getMracC0X();
+			mrac_msg.rho_x = _control.getMracRhoX();
+			mrac_msg.ua_x = _control.getMracUaX();
+			mrac_msg.u_x = _control.getMracUX();
+			mrac_msg.ym_x = _control.getMracYmX();
+			mrac_msg.the11_y = _control.getMracThe11Y();
+			mrac_msg.the12_y = _control.getMracThe12Y();
+			mrac_msg.the21_y = _control.getMracThe21Y();
+			mrac_msg.the22_y = _control.getMracThe22Y();
+			mrac_msg.the3_y = _control.getMracThe3Y();
+			mrac_msg.c0_y = _control.getMracC0Y();
+			mrac_msg.rho_y = _control.getMracRhoY();
+			mrac_msg.ua_y = _control.getMracUaY();
+			mrac_msg.u_y = _control.getMracUY();
+			mrac_msg.ym_y = _control.getMracYmY();
 			publish_mrac(mrac_msg);
 
 			// Inform FlightTask about the input and output of the velocity controller

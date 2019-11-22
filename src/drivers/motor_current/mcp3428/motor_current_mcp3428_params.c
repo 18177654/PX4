@@ -39,15 +39,15 @@
  */
 
 /**
- * Volts per amp.
+ * Amps per volt.
  *
  * @min 0.0
- * @max 10.0
+ * @max 100.0
  * @decimal 4
- * @increment 0.0001
+ * @increment 0.001
  * @group Motor Currents
  */
-PARAM_DEFINE_FLOAT(MOT_ACS_V_PER_A, 0.0266f);
+PARAM_DEFINE_FLOAT(MOT_ACS_A_PER_V, 37.5f);
 
 /**
  * The resolution of a bit.
@@ -61,7 +61,7 @@ PARAM_DEFINE_FLOAT(MOT_ACS_V_PER_A, 0.0266f);
 PARAM_DEFINE_FLOAT(MOT_MCP_LSB, 0.00025f);
 
 /**
- * Bias the motor current to measure 0 amps when motors are off.
+ * Bias the current of motor 1 to measure 0 amps when motors are off.
  *
  * @min -100.0
  * @max 100.0
@@ -69,7 +69,40 @@ PARAM_DEFINE_FLOAT(MOT_MCP_LSB, 0.00025f);
  * @increment 0.01
  * @group Motor Currents
  */
-PARAM_DEFINE_FLOAT(MOT_MCP_BIAS, -8.55f);
+PARAM_DEFINE_FLOAT(MOT_MCP_BIAS1, -0.525f);
+
+/**
+ * Bias the current of motor 2 to measure 0 amps when motors are off.
+ *
+ * @min -100.0
+ * @max 100.0
+ * @decimal 2
+ * @increment 0.01
+ * @group Motor Currents
+ */
+PARAM_DEFINE_FLOAT(MOT_MCP_BIAS2, -0.525f);
+
+/**
+ * Bias the current of motor 3 to measure 0 amps when motors are off.
+ *
+ * @min -100.0
+ * @max 100.0
+ * @decimal 2
+ * @increment 0.01
+ * @group Motor Currents
+ */
+PARAM_DEFINE_FLOAT(MOT_MCP_BIAS3, -0.525f);
+
+/**
+ * Bias the current of motor 4 to measure 0 amps when motors are off.
+ *
+ * @min -100.0
+ * @max 100.0
+ * @decimal 2
+ * @increment 0.01
+ * @group Motor Currents
+ */
+PARAM_DEFINE_FLOAT(MOT_MCP_BIAS4, -0.525f);
 
 /**
  * The cutoff frequency of the lowpass filter for the current measurements (in hertz).
@@ -80,4 +113,4 @@ PARAM_DEFINE_FLOAT(MOT_MCP_BIAS, -8.55f);
  * @increment 0.01
  * @group Motor Currents
  */
-PARAM_DEFINE_FLOAT(MOT_CURR_CUTOFF, 0.5f);
+PARAM_DEFINE_FLOAT(MOT_CURR_CUTOFF, 0.1f);
